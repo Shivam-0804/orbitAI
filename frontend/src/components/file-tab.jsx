@@ -26,7 +26,7 @@ function Filetab({
               : "0.1px solid #4d4d4d",
             height: "100%",
             boxSizing: "border-box",
-            backgroundColor: "#212121",
+            backgroundColor: "#181818",
             flexShrink: 0,
           }}
           onResizeStart={() => setIsResizing(true)}

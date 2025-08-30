@@ -1,5 +1,5 @@
 import Editor from "@monaco-editor/react";
-import styles from "./css/explorer.module.css";
+import styles from "./css/editor.module.css";
 import { File, X } from "lucide-react";
 
 export default function EditorWindow({
@@ -10,6 +10,7 @@ export default function EditorWindow({
   handleContentChange,
 }) {
   const activeFile = openTabs.find((tab) => tab.path === activeTab);
+
   const getLanguage = (fileName) => {
     if (!fileName) return "plaintext";
     const extension = fileName.split(".").pop();
@@ -31,9 +32,9 @@ export default function EditorWindow({
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-900 text-white flex-grow">
+    <>
       {/* Tab Bar */}
-      <div className="flex border-b border-gray-700 bg-[#212121]">
+      <div className="">
         {openTabs.map((tab) => (
           <div
             key={tab.path}
@@ -51,7 +52,7 @@ export default function EditorWindow({
                 e.stopPropagation();
                 handleCloseTab(tab.path);
               }}
-              className="p-1 rounded-full hover:bg-gray-600"
+              className=""
             >
               <X />
             </button>
@@ -60,7 +61,7 @@ export default function EditorWindow({
       </div>
 
       {/* Editor Content */}
-      <div className="">
+      <div className={styles.editor}>
         {activeFile ? (
           <Editor
             key={activeFile.path}
@@ -82,10 +83,17 @@ export default function EditorWindow({
           />
         ) : (
           <div className={styles["empty-bg"]}>
-            <div className={styles["empty-text"]}>fjaslfj;s</div>
+            <img src="./empty.svg" className={styles["empty-img"]}></img>
+            <h1 className={styles.tagline}>
+              Your Instant Development Environment
+            </h1>
+            <p className={styles.para}>
+              Just open a tab to a consistent, powerful, and ready-to-use
+              workspace, and focus purely on your code.
+            </p>
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }

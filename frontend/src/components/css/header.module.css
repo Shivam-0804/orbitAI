@@ -2,10 +2,10 @@
   --main-color: #4051b5;
 
   --dark-theme-name-color: #fff;
-  --dark-theme-header-color: #212121;
+  --dark-theme-header-color: #181818;
 }
 .header {
-  background-color: var(--dark-theme-header-color);
+  background-color: #181818;
   width: 100%;
   height: 6rem;
   padding: 1rem;
