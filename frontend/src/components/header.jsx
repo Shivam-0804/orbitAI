@@ -1,5 +1,4 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCode, faCircleUser} from "@fortawesome/free-solid-svg-icons";
+import { BringToFront,CircleUser} from 'lucide-react';
 import styles from "./css/header.module.css";
 
 function Header() {
@@ -8,13 +7,13 @@ function Header() {
     <div className={styles.header}>
         {/* logo */}
         <div className={styles.logo}>
-          <FontAwesomeIcon icon={faCode} className={styles.icon} />
-          <p className={styles.name}>codec</p>
+          <div className={styles.icon}><BringToFront/></div>
+          <p className={styles.name}>orbitAI</p>
         </div>
 
         {/* user */}
         <div className={styles.image}>
-            <FontAwesomeIcon icon={faCircleUser} className={styles.image} />
+            <CircleUser className={styles.image}/>
         </div>
     </div>
     </>
