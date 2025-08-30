@@ -1,4 +1,33 @@
+.tabs {
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+  background-color: #161616;
+  color: white;
+}
+.subtabs {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  justify-content: space-evenly;
+  padding: 0.8rem;
+}
+.subtabs.active {
+  background-color: #1e1e1e;
+  border-top:2px solid #4051b5;
+}
 
+.subtabs:hover {
+  background-color: #414141;
+}
+.subtabs-icons {
+  height: 1.2rem;
+}
+.subtabs-close {
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+}
 
 /* when no file is select */
 .empty-bg {

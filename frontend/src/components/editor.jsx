@@ -33,29 +33,27 @@ export default function EditorWindow({
 
   return (
     <>
+      {/* activeTab === tab.path */}
       {/* Tab Bar */}
-      <div className="">
+      <div className={styles.tabs}>
         {openTabs.map((tab) => (
           <div
             key={tab.path}
             onClick={() => setActiveTab(tab.path)}
-            className={`flex items-center gap-2 px-4 py-2 text-sm cursor-pointer border-r border-gray-700 ${
-              activeTab === tab.path
-                ? "bg-[#2c2c2c]"
-                : "bg-[#212121] hover:bg-[#2c2c2c]"
+            className={`${styles.subtabs} ${
+              activeTab === tab.path ? styles.active : ""
             }`}
           >
-            <File />
+            <File className={styles["subtabs-icons"]} />
             <span className="select-none">{tab.name}</span>
-            <button
+            <div
               onClick={(e) => {
                 e.stopPropagation();
                 handleCloseTab(tab.path);
               }}
-              className=""
             >
-              <X />
-            </button>
+              <X className={styles["subtabs-close"]} />
+            </div>
           </div>
         ))}
       </div>
@@ -64,7 +62,6 @@ export default function EditorWindow({
       <div className={styles.editor}>
         {activeFile ? (
           <Editor
-            key={activeFile.path}
             height="100%"
             width="100%"
             language={getLanguage(activeFile.name)}

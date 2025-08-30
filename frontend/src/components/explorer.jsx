@@ -1,24 +1,16 @@
 import { useState, useEffect, useRef } from "react";
-import { FolderPlus, FilePlus2 } from "lucide-react";
+import styles from "./css/explorer.module.css";
+import {
+  FolderPlus,
+  FilePlus2,
+  Trash,
+  ChevronDown,
+  ChevronRight,
+  File,
+  Folder,
+} from "lucide-react";
 
-// --- Icon Components ---
-const FolderIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" > <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path> </svg>
-);
-const FileIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" > <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path> <polyline points="14 2 14 8 20 8"></polyline> </svg>
-);
-const ChevronRightIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" > <path d="m9 18 6-6-6-6"></path> </svg>
-);
-const ChevronDownIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" > <path d="m6 9 6 6 6-6"></path> </svg>
-);
-const TrashIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" > <path d="M3 6h18"></path> <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path> <line x1="10" x2="10" y1="11" y2="17"></line> <line x1="14" x2="14" y1="11" y2="17"></line> </svg>
-);
-
-// --- Component for user input when creating a new file/folder ---
+// --- Creator Input ---
 const CreatorInput = ({ type, onCancel, onCreate }) => {
   const inputRef = useRef(null);
 
@@ -35,57 +27,72 @@ const CreatorInput = ({ type, onCancel, onCreate }) => {
   };
 
   return (
-    <div className="flex items-center gap-2 py-1 pl-5">
-      {type === "folder" ? <FolderIcon /> : <FileIcon />}
+    <div className={styles.create}>
+      {type === "folder" ? (
+        <Folder size={16} className={styles["folder-tab-icons"]} />
+      ) : (
+        <File size={16} className={styles["folder-tab-icons"]} />
+      )}
       <input
         ref={inputRef}
         type="text"
         onKeyDown={handleKeyDown}
         onBlur={onCancel}
-        className="bg-gray-800 text-white text-sm rounded px-1 flex-grow outline-none"
+        className={styles.createInput}
       />
     </div>
   );
 };
 
-// --- Component for a single folder item ---
-const FolderItem = ({ item, onFileClick, onDelete, onStartCreate }) => {
+// --- Folder Item ---
+const FolderItem = ({
+  item,
+  onFileClick,
+  onDelete,
+  onStartCreate,
+  isCreating,
+}) => {
   const [isOpen, setIsOpen] = useState(true);
-  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="flex flex-col">
-      <div
-        className="flex items-center justify-between rounded hover:bg-gray-700 cursor-pointer pr-2"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 p-1 flex-grow text-left"
-        >
-          {isOpen ? <ChevronDownIcon /> : <ChevronRightIcon />}
-          <FolderIcon />
-          <span className="truncate">{item.name}</span>
-        </button>
+    <div className={styles["folder-item"]}>
+      <div className={styles["folder-tab"]}>
         <div
-          className={`flex gap-1 transition-opacity duration-200 ${
-            isHovered ? "opacity-100" : "opacity-0"
-          }`}
+          onClick={() => setIsOpen(!isOpen)}
+          className={styles["folder-tab-header"]}
         >
-          <button onClick={() => onStartCreate("file", item.path)} className="p-1 rounded hover:bg-gray-600" > <FilePlus2 size={14} /> </button>
-          <button onClick={() => onStartCreate("folder", item.path)} className="p-1 rounded hover:bg-gray-600" > <FolderPlus size={14} /> </button>
-          <button onClick={() => onDelete(item.path)} className="p-1 rounded hover:bg-gray-600" > <TrashIcon /> </button>
+          {isOpen ? (
+            <ChevronDown size={16} className={styles["folder-tab-icons"]} />
+          ) : (
+            <ChevronRight size={16} className={styles["folder-tab-icons"]} />
+          )}
+          <Folder size={16} className={styles["folder-tab-icons"]} />
+          <span className={styles["folder-tab-name"]}>{item.name}</span>
+        </div>
+
+        {/* Hover Options */}
+        <div className={styles["folder-tab-options"]}>
+          <div onClick={() => onStartCreate("file", item.path)}>
+            <FilePlus2 size={16} className={styles["folder-tab-icons"]} />
+          </div>
+          <div onClick={() => onStartCreate("folder", item.path)}>
+            <FolderPlus size={16} className={styles["folder-tab-icons"]} />
+          </div>
+          <div onClick={() => onDelete(item.path)}>
+            <Trash size={16} className={styles["folder-tab-icons"]} />
+          </div>
         </div>
       </div>
-      {isOpen && (
-        <div className="pl-4 border-l border-gray-600 ml-2">
+
+      {isOpen && item.children?.length > 0 && (
+        <div className={styles["subfolders"]}>
           <FileExplorer
             items={item.children}
             onFileClick={onFileClick}
             onDelete={onDelete}
             onStartCreate={onStartCreate}
             parentPath={item.path}
+            isCreating={isCreating}
           />
         </div>
       )}
@@ -93,55 +100,58 @@ const FolderItem = ({ item, onFileClick, onDelete, onStartCreate }) => {
   );
 };
 
-// --- Component for a single file item ---
+// --- File Item ---
 const FileItem = ({ item, onFileClick, onDelete }) => {
-  const [isHovered, setIsHovered] = useState(false);
   return (
-    <div
-      className="flex items-center justify-between rounded hover:bg-gray-700 cursor-pointer pr-2"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <button
+    <div className={styles["folder-tab"]}>
+      <div
         onClick={() => onFileClick(item)}
-        className="flex items-center gap-2 p-1 flex-grow text-left"
+        className={styles["folder-tab-header"]}
       >
-        <div className="w-4 shrink-0"></div> {/* Spacer */}
-        <FileIcon />
-        <span className="truncate">{item.name}</span>
-      </button>
-      <button
+        <div></div> {/* Spacer */}
+        <File size={16} className={styles["folder-tab-icons"]} />
+        <span className={styles["folder-tab-name"]}>{item.name}</span>
+      </div>
+      <div
         onClick={() => onDelete(item.path)}
-        className={`p-1 rounded hover:bg-gray-600 transition-opacity duration-200 ${isHovered ? "opacity-100" : "opacity-0"}`}
+        className={styles["folder-tab-options"]}
       >
-        <TrashIcon />
-      </button>
+        <Trash size={16} className={styles["folder-tab-icons"]} />
+      </div>
     </div>
   );
 };
 
-// --- Recursive component to render the file tree ---
-const FileExplorer = ({ items, onFileClick, onDelete, onStartCreate, parentPath, isCreating }) => {
+// --- Recursive File Explorer ---
+const FileExplorer = ({
+  items,
+  onFileClick,
+  onDelete,
+  onStartCreate,
+  parentPath,
+  isCreating,
+}) => {
   return (
     <>
-      {items.map((item) => (
-        <div key={item.path} className="text-sm my-0.5">
-          {item.type === "folder" ? (
-            <FolderItem
-              item={item}
-              onFileClick={onFileClick}
-              onDelete={onDelete}
-              onStartCreate={onStartCreate}
-            />
-          ) : (
-            <FileItem
-              item={item}
-              onFileClick={onFileClick}
-              onDelete={onDelete}
-            />
-          )}
-        </div>
-      ))}
+      {items.map((item) =>
+        item.type === "folder" ? (
+          <FolderItem
+            key={item.path}
+            item={item}
+            onFileClick={onFileClick}
+            onDelete={onDelete}
+            onStartCreate={onStartCreate}
+            isCreating={isCreating}
+          />
+        ) : (
+          <FileItem
+            key={item.path}
+            item={item}
+            onFileClick={onFileClick}
+            onDelete={onDelete}
+          />
+        )
+      )}
       {isCreating && isCreating.parentPath === parentPath && (
         <CreatorInput {...isCreating} />
       )}
@@ -149,28 +159,37 @@ const FileExplorer = ({ items, onFileClick, onDelete, onStartCreate, parentPath,
   );
 };
 
-// --- Main Explorer component ---
-export default function Explorer({ fileSystem, handleFileClick, handleDelete, handleStartCreate, isCreating }) {
+// --- Main Explorer Component ---
+export default function Explorer({
+  fileSystem,
+  handleFileClick,
+  handleDelete,
+  handleStartCreate,
+  isCreating,
+}) {
   return (
-    <div className="bg-[#212121] text-white flex flex-col h-full">
-      <div className="flex items-center justify-between p-2 border-b border-gray-700">
-        <h2 className="text-sm font-bold">Explorer</h2>
-        <div className="flex gap-2">
-          <button onClick={() => handleStartCreate("file", null)} className="p-1 hover:bg-gray-700 rounded" > <FilePlus2 size={16} /> </button>
-          <button onClick={() => handleStartCreate("folder", null)} className="p-1 hover:bg-gray-700 rounded" > <FolderPlus size={16} /> </button>
+    <div className={styles["main-tab-window"]}>
+      <div className={styles["main-header"]}>
+        <h2 className={styles["main-header-text"]}>Explorer</h2>
+        <div className={styles["main-header-icons"]}>
+          <div onClick={() => handleStartCreate("file", null)}>
+            <FilePlus2 size={16} className={styles["main-header-icon"]} />
+          </div>
+          <div onClick={() => handleStartCreate("folder", null)}>
+            <FolderPlus size={16} className={styles["main-header-icon"]} />
+          </div>
         </div>
       </div>
-      <div className="flex-grow overflow-y-auto p-1">
+      <div>
         <FileExplorer
           items={fileSystem}
           onFileClick={handleFileClick}
           onDelete={handleDelete}
           onStartCreate={handleStartCreate}
-          isCreating={isCreating}
           parentPath={null}
+          isCreating={isCreating}
         />
       </div>
     </div>
   );
 }
-

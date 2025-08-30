@@ -2,7 +2,7 @@ import { useState } from "react";
 import Header from "../components/header.jsx";
 import Options from "../components/options.jsx";
 import FileTab from "../components/file-tab.jsx";
-import Terminal from "../components/terminal.jsx";
+import TerminalWindow from "../components/terminal.jsx";
 import EditorWindow from "../components/editor.jsx";
 import Menu from "../components/menu.jsx";
 import Footer from "../components/footer.jsx";
@@ -12,44 +12,51 @@ import "./global.css";
 const initialFileSystem = [
   {
     type: "folder",
-    name: "src",
-    path: "/src",
+    name: "/",
+    path: "/",
     children: [
       {
         type: "folder",
-        name: "components",
-        path: "/src/components",
+        name: "src",
+        path: "/src",
         children: [
           {
-            type: "file",
-            name: "Button.jsx",
-            path: "/src/components/Button.jsx",
-            content:
-              "export default function Button() {\n  return <button>Click Me</button>;\n}",
+            type: "folder",
+            name: "components",
+            path: "/src/components",
+            children: [
+              {
+                type: "file",
+                name: "Button.jsx",
+                path: "/src/components/Button.jsx",
+                content:
+                  "export default function Button() {\n  return <button>Click Me</button>;\n}",
+              },
+              {
+                type: "file",
+                name: "Header.jsx",
+                path: "/src/components/Header.jsx",
+                content:
+                  "export default function Header() {\n  return <h1>My App</h1>;\n}",
+              },
+            ],
           },
           {
             type: "file",
-            name: "Header.jsx",
-            path: "/src/components/Header.jsx",
+            name: "App.jsx",
+            path: "/src/App.jsx",
             content:
-              "export default function Header() {\n  return <h1>My App</h1>;\n}",
+              'import React from "react";\n\nfunction App() {\n  return <div>Hello World</div>;\n}\n\nexport default App;',
           },
         ],
       },
-      {
+      { 
         type: "file",
-        name: "App.jsx",
-        path: "/src/App.jsx",
-        content:
-          'import React from "react";\n\nfunction App() {\n  return <div>Hello World</div>;\n}\n\nexport default App;',
+        name: "package.json",
+        path: "/package.json",
+        content: '{ "name": "react-app" }',
       },
     ],
-  },
-  {
-    type: "file",
-    name: "package.json",
-    path: "/package.json",
-    content: '{ "name": "react-app" }',
   },
 ];
 
@@ -204,6 +211,7 @@ export default function App() {
             flexGrow: 1,
             minHeight: 0,
             minWidth: 0,
+            overflow: "hidden",
           }}
         >
           <div
@@ -222,7 +230,11 @@ export default function App() {
               handleContentChange={handleContentChange}
             />
           </div>
-          <Terminal />
+          <TerminalWindow
+            fileSystem={fileSystem}
+            setFileSystem={setFileSystem}
+            onClose={() => console.log("Close terminal")}
+          />
         </div>
       </div>
       <Footer />
