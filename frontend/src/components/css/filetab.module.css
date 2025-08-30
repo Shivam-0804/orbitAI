@@ -1,0 +1,13 @@
+.tab{
+  display: flex;
+  flex-direction: column;
+}
+.header{
+  color: #ffff;
+  font-weight: 100;
+  font-size: 1rem;
+  position: fixed;
+}
+.folder{
+  flex-grow: 1;
+}
