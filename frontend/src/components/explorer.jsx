@@ -6,9 +6,8 @@ import {
   Trash,
   ChevronDown,
   ChevronRight,
-  File,
-  Folder,
 } from "lucide-react";
+import { getFileIcon } from "../utils/getFileIcon";
 
 // --- Creator Input ---
 const CreatorInput = ({ type, onCancel, onCreate }) => {
@@ -29,9 +28,17 @@ const CreatorInput = ({ type, onCancel, onCreate }) => {
   return (
     <div className={styles.create}>
       {type === "folder" ? (
-        <Folder size={16} className={styles["folder-tab-icons"]} />
+        <img
+          src="/icons/folder.svg"
+          alt="folder"
+          className={styles["folder-tab-icons"]}
+        />
       ) : (
-        <File size={16} className={styles["folder-tab-icons"]} />
+        <img
+          src="/icons/file.svg"
+          alt="file"
+          className={styles["folder-tab-icons"]}
+        />
       )}
       <input
         ref={inputRef}
@@ -66,7 +73,12 @@ const FolderItem = ({
           ) : (
             <ChevronRight size={16} className={styles["folder-tab-icons"]} />
           )}
-          <Folder size={16} className={styles["folder-tab-icons"]} />
+          <img
+            src="/icons/folder.svg"
+            alt="folder"
+            className={styles["folder-tab-icons"]}
+          />
+          {/* <Folder size={16} className={styles["folder-tab-icons"]} /> */}
           <span className={styles["folder-tab-name"]}>{item.name}</span>
         </div>
 
@@ -102,6 +114,7 @@ const FolderItem = ({
 
 // --- File Item ---
 const FileItem = ({ item, onFileClick, onDelete }) => {
+  const iconSrc = getFileIcon(item.name);
   return (
     <div className={styles["folder-tab"]}>
       <div
@@ -109,7 +122,8 @@ const FileItem = ({ item, onFileClick, onDelete }) => {
         className={styles["folder-tab-header"]}
       >
         <div></div> {/* Spacer */}
-        <File size={16} className={styles["folder-tab-icons"]} />
+        <img src={iconSrc} alt="file" className={styles["folder-tab-icons"]} />
+        {/* <File size={16} className={styles["folder-tab-icons"]} /> */}
         <span className={styles["folder-tab-name"]}>{item.name}</span>
       </div>
       <div

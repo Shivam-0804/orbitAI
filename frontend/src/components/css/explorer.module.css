@@ -50,6 +50,8 @@
 .folder-tab-icons {
   color: white;
   cursor: pointer;
+  height: 1.6rem;
+  width: auto;
 }
 .folder-tab-header {
   display: flex;

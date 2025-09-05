@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
+import styles from "./css/terminal.module.css";
 
 export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
   const [isResizing, setIsResizing] = useState(false);
@@ -85,7 +86,7 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
     xtermRef.current = new Terminal({
       cursorBlink: true,
       fontSize: 14,
-      theme: { background: "#212121", foreground: "#ffffff" },
+      theme: { background: "#181818", foreground: "#ffffff" },
       scrollback: 1000,
     });
     xtermRef.current.loadAddon(fitAddon.current);
@@ -93,7 +94,6 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
     if (terminalRef.current) {
       xtermRef.current.open(terminalRef.current);
       fitAddon.current.fit();
-      // xtermRef.current.writeln("Welcome to your virtual terminal!");
       printPrompt();
     }
 
@@ -161,7 +161,6 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
           }
           break;
         case "clear":
-          // xtermRef.current.reset();
           xtermRef.current.clear();
           break;
         default:
@@ -187,11 +186,13 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
       }
     });
 
-    const handleResize = () => fitAddon.current.fit();
-    window.addEventListener("resize", handleResize);
+    const handleWindowResize = () => {
+      fitAddon.current.fit(); // Only on window resize
+    };
+    window.addEventListener("resize", handleWindowResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleWindowResize);
       xtermRef.current.dispose();
     };
   }, [
@@ -208,37 +209,25 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
   return (
     <Resizable
       defaultSize={{ width: "100%", height: "30%" }}
-      minHeight="10%"
+      minHeight="5%"
       maxHeight="90%"
       enable={{ top: true }}
       onResizeStart={() => setIsResizing(true)}
-      onResizeStop={() => setIsResizing(false)}
+      onResizeStop={() => {
+        setIsResizing(false);
+        fitAddon.current.fit();
+      }}
       style={{
-        borderTop: isResizing ? "4px solid #4051b5" : "1px solid #a09f9f",
+        borderTop: isResizing ? "4px solid #4051b5" : "",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#212121",
-        flexShrink: 0,
-        flexGrow: 1,
+        backgroundColor: "#1a1a1a",
       }}
     >
-      {/* Sticky Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "5px 10px",
-          backgroundColor: "#1a1a1a",
-          borderBottom: "1px solid #444",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          flexShrink: 0,
-        }}
-      >
-        <span style={{ color: "#fff", fontWeight: "bold" }}>Terminal</span>
-        <button
+      {/* Terminal Header */}
+      <div className={styles["terminal-header"]}>
+        <span className={styles["terminal-header-options"]}>Terminal</span>
+        <div
           onClick={onClose}
           style={{
             background: "transparent",
@@ -248,16 +237,16 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
           }}
         >
           <X size={16} />
-        </button>
+        </div>
       </div>
 
-      {/* Terminal */}
+      {/* Terminal Container */}
       <div
         ref={terminalRef}
+        className={styles["terminal-container"]}
         style={{
           flex: 1,
           overflow: "hidden",
-          flexGrow: 1,
         }}
       ></div>
     </Resizable>
