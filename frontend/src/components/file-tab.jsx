@@ -9,6 +9,7 @@ function Filetab({
   handleDelete,
   handleStartCreate,
   isCreating,
+  activeTab,
 }) {
   const [isResizing, setIsResizing] = useState(false);
 
@@ -38,6 +39,7 @@ function Filetab({
             handleDelete={handleDelete}
             handleStartCreate={handleStartCreate}
             isCreating={isCreating}
+            activeTab={activeTab}
           />
         </Resizable>
       ) : null}

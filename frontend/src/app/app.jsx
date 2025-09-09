@@ -1,13 +1,21 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
+import { loader } from "@monaco-editor/react";
 import Header from "../components/header.jsx";
 import Options from "../components/options.jsx";
 import FileTab from "../components/file-tab.jsx";
 import TerminalWindow from "../components/terminal.jsx";
-import EditorWindow from "../components/editor.jsx";
 import Menu from "../components/menu.jsx";
 import Footer from "../components/footer.jsx";
 
 import "./global.css";
+
+const EditorWindow = lazy(() => import("../components/editor.jsx"));
+
+loader.config({
+  paths: {
+    vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.41.0/min/vs",
+  },
+});
 
 const initialFileSystem = [
   {
@@ -15,47 +23,12 @@ const initialFileSystem = [
     name: "/",
     path: "/",
     children: [
-      {
-        type: "folder",
-        name: "src",
-        path: "/src",
-        children: [
-          {
-            type: "folder",
-            name: "components",
-            path: "/src/components",
-            children: [
-              {
-                type: "file",
-                name: "Button.jsx",
-                path: "/src/components/Button.jsx",
-                content:
-                  "export default function Button() {\n  return <button>Click Me</button>;\n}",
-              },
-              {
-                type: "file",
-                name: "Header.jsx",
-                path: "/src/components/Header.jsx",
-                content:
-                  "export default function Header() {\n  return <h1>My App</h1>;\n}",
-              },
-            ],
-          },
-          {
-            type: "file",
-            name: "App.jsx",
-            path: "/src/App.jsx",
-            content:
-              'import React from "react";\n\nfunction App() {\n  return <div>Hello World</div>;\n}\n\nexport default App;',
-          },
-        ],
-      },
-      { 
-        type: "file",
-        name: "package.json",
-        path: "/package.json",
-        content: '{ "name": "react-app" }',
-      },
+      // {
+      //   type: "file",
+      //   name: "main.js",
+      //   path: "/main.js",
+      //   content: `// Type here to see suggestions and errors!\n\nfunction greet(name) {\n  console.log("Hello, " + name);\n}\n\ngreet("World")\n\nconst x = 1;\nx = 2; // This will show an error squiggle`,
+      // },
     ],
   },
 ];
@@ -203,6 +176,7 @@ export default function App() {
           handleDelete={handleDelete}
           handleStartCreate={handleStartCreate}
           isCreating={isCreating}
+          activeTab={activeTab}
         />
         <div
           style={{
@@ -222,13 +196,30 @@ export default function App() {
               flexDirection: "column",
             }}
           >
-            <EditorWindow
-              openTabs={openTabs}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              handleCloseTab={handleCloseTab}
-              handleContentChange={handleContentChange}
-            />
+            <Suspense
+              fallback={
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: "#ffff",
+                    color: "white",
+                    display: "grid",
+                    placeContent: "center",
+                  }}
+                >
+                  Loading Editor...
+                </div>
+              }
+            >
+              <EditorWindow
+                openTabs={openTabs}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                handleCloseTab={handleCloseTab}
+                handleContentChange={handleContentChange}
+              />
+            </Suspense>
           </div>
           <TerminalWindow
             fileSystem={fileSystem}

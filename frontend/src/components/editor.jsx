@@ -26,6 +26,14 @@ export default function EditorWindow({
         return "html";
       case "md":
         return "markdown";
+      case "py":
+        return "python";
+      case "java":
+        return "java";
+      case "go":
+        return "go";
+      case "cpp":
+        return "cpp";
       default:
         return "plaintext";
     }
@@ -33,7 +41,6 @@ export default function EditorWindow({
 
   return (
     <>
-      {/* activeTab === tab.path */}
       {/* Tab Bar */}
       <div className={styles.tabs}>
         {openTabs.map((tab) => (
@@ -64,6 +71,7 @@ export default function EditorWindow({
           <Editor
             height="100%"
             width="100%"
+            path={activeFile.path}
             language={getLanguage(activeFile.name)}
             value={activeFile.content}
             onChange={(value) =>
@@ -76,6 +84,18 @@ export default function EditorWindow({
               wordWrap: "on",
               scrollBeyondLastLine: false,
               automaticLayout: true,
+              folding: true,
+              lightbulb: { enabled: true },
+              autoClosingBrackets: "always",
+              autoClosingQuotes: "always",
+              quickSuggestions: {
+                other: "on",
+                comments: "on",
+                strings: "on",
+              },
+              suggestOnTriggerCharacters: true,
+              acceptSuggestionOnEnter: "on",
+              formatOnType: true,
             }}
           />
         ) : (

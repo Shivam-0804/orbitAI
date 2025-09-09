@@ -4,7 +4,7 @@
   align-items: center;
   height: 3rem;
   width: 100%;
-  padding: 1rem 2rem;
+  padding: 0.5rem 1rem;
   background-color: #181818;
   border-bottom: 0.1px solid #a09f9f;
   color: white;
@@ -20,7 +20,7 @@
   position: relative;
   display: inline-block;
   cursor: pointer;
-  padding: 2px 6px;
+  padding: 2px;
   border-radius: 2px;
 }
 

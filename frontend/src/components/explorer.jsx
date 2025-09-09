@@ -6,10 +6,10 @@ import {
   Trash,
   ChevronDown,
   ChevronRight,
+  MoreHorizontal,
 } from "lucide-react";
 import { getFileIcon } from "../utils/getFileIcon";
 
-// --- Creator Input ---
 const CreatorInput = ({ type, onCancel, onCreate }) => {
   const inputRef = useRef(null);
 
@@ -51,21 +51,23 @@ const CreatorInput = ({ type, onCancel, onCreate }) => {
   );
 };
 
-// --- Folder Item ---
 const FolderItem = ({
   item,
   onFileClick,
   onDelete,
   onStartCreate,
   isCreating,
+  openFolders,
+  toggleFolder,
+  activeTab,
 }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const isOpen = openFolders[item.path] || false;
 
   return (
     <div className={styles["folder-item"]}>
       <div className={styles["folder-tab"]}>
         <div
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => toggleFolder(item.path)}
           className={styles["folder-tab-header"]}
         >
           {isOpen ? (
@@ -78,11 +80,8 @@ const FolderItem = ({
             alt="folder"
             className={styles["folder-tab-icons"]}
           />
-          {/* <Folder size={16} className={styles["folder-tab-icons"]} /> */}
           <span className={styles["folder-tab-name"]}>{item.name}</span>
         </div>
-
-        {/* Hover Options */}
         <div className={styles["folder-tab-options"]}>
           <div onClick={() => onStartCreate("file", item.path)}>
             <FilePlus2 size={16} className={styles["folder-tab-icons"]} />
@@ -90,21 +89,32 @@ const FolderItem = ({
           <div onClick={() => onStartCreate("folder", item.path)}>
             <FolderPlus size={16} className={styles["folder-tab-icons"]} />
           </div>
-          <div onClick={() => onDelete(item.path)}>
-            <Trash size={16} className={styles["folder-tab-icons"]} />
-          </div>
+          {item.name !== "/" ? (
+            <div onClick={() => onDelete(item.path)}>
+              <Trash size={16} className={styles["folder-tab-icons"]} />
+            </div>
+          ) : (
+            <div onClick={() => onDelete(item.path)}>
+              <MoreHorizontal
+                size={16}
+                className={styles["folder-tab-icons"]}
+              />
+            </div>
+          )}
         </div>
       </div>
-
-      {isOpen && item.children?.length > 0 && (
+      {isOpen && (
         <div className={styles["subfolders"]}>
           <FileExplorer
-            items={item.children}
+            items={item.children || []}
             onFileClick={onFileClick}
             onDelete={onDelete}
             onStartCreate={onStartCreate}
             parentPath={item.path}
             isCreating={isCreating}
+            openFolders={openFolders}
+            toggleFolder={toggleFolder}
+            activeTab={activeTab}
           />
         </div>
       )}
@@ -112,18 +122,20 @@ const FolderItem = ({
   );
 };
 
-// --- File Item ---
-const FileItem = ({ item, onFileClick, onDelete }) => {
+const FileItem = ({ item, onFileClick, onDelete, activeTab }) => {
   const iconSrc = getFileIcon(item.name);
   return (
-    <div className={styles["folder-tab"]}>
+    <div
+      className={`${styles["folder-tab"]} ${
+        activeTab == item.path ? styles.activeFile : ""
+      }`}
+    >
       <div
         onClick={() => onFileClick(item)}
         className={styles["folder-tab-header"]}
       >
-        <div></div> {/* Spacer */}
+        <div></div>
         <img src={iconSrc} alt="file" className={styles["folder-tab-icons"]} />
-        {/* <File size={16} className={styles["folder-tab-icons"]} /> */}
         <span className={styles["folder-tab-name"]}>{item.name}</span>
       </div>
       <div
@@ -136,7 +148,6 @@ const FileItem = ({ item, onFileClick, onDelete }) => {
   );
 };
 
-// --- Recursive File Explorer ---
 const FileExplorer = ({
   items,
   onFileClick,
@@ -144,6 +155,9 @@ const FileExplorer = ({
   onStartCreate,
   parentPath,
   isCreating,
+  openFolders,
+  toggleFolder,
+  activeTab,
 }) => {
   return (
     <>
@@ -156,6 +170,9 @@ const FileExplorer = ({
             onDelete={onDelete}
             onStartCreate={onStartCreate}
             isCreating={isCreating}
+            openFolders={openFolders}
+            toggleFolder={toggleFolder}
+            activeTab={activeTab}
           />
         ) : (
           <FileItem
@@ -163,6 +180,7 @@ const FileExplorer = ({
             item={item}
             onFileClick={onFileClick}
             onDelete={onDelete}
+            activeTab={activeTab}
           />
         )
       )}
@@ -173,25 +191,39 @@ const FileExplorer = ({
   );
 };
 
-// --- Main Explorer Component ---
 export default function Explorer({
   fileSystem,
   handleFileClick,
   handleDelete,
   handleStartCreate,
   isCreating,
+  activeTab,
 }) {
+  const [openFolders, setOpenFolders] = useState({});
+
+  const toggleFolder = (path) => {
+    setOpenFolders((prev) => ({
+      ...prev,
+      [path]: !prev[path],
+    }));
+  };
+
+  const handleStartCreateAndOpen = (type, parentPath) => {
+    if (parentPath) {
+      setOpenFolders((prev) => ({
+        ...prev,
+        [parentPath]: true,
+      }));
+    }
+    handleStartCreate(type, parentPath);
+  };
+
   return (
     <div className={styles["main-tab-window"]}>
       <div className={styles["main-header"]}>
         <h2 className={styles["main-header-text"]}>Explorer</h2>
-        <div className={styles["main-header-icons"]}>
-          <div onClick={() => handleStartCreate("file", null)}>
-            <FilePlus2 size={16} className={styles["main-header-icon"]} />
-          </div>
-          <div onClick={() => handleStartCreate("folder", null)}>
-            <FolderPlus size={16} className={styles["main-header-icon"]} />
-          </div>
+        <div>
+          <MoreHorizontal size={16} className={styles["main-header-icon"]} />
         </div>
       </div>
       <div>
@@ -199,9 +231,12 @@ export default function Explorer({
           items={fileSystem}
           onFileClick={handleFileClick}
           onDelete={handleDelete}
-          onStartCreate={handleStartCreate}
+          onStartCreate={handleStartCreateAndOpen}
           parentPath={null}
           isCreating={isCreating}
+          openFolders={openFolders}
+          toggleFolder={toggleFolder}
+          activeTab={activeTab} // <-- pass it down
         />
       </div>
     </div>
