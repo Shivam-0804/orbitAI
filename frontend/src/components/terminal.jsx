@@ -19,7 +19,7 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
   const [isExecuting, setIsExecuting] = useState(false);
   const commandRef = useRef("");
 
-  // --- Helper Functions (remain unchanged) ---
+  // ---------------- Helper Functions ----------------
   const normalizePath = (path) => {
     const parts = path.split("/").filter(Boolean);
     const stack = [];
@@ -66,15 +66,32 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
     });
   }, []);
 
+  const colorText = (text, color) => {
+    const colors = {
+      red: "\x1b[31m",
+      green: "\x1b[32m",
+      yellow: "\x1b[33m",
+      blue: "\x1b[34m",
+      magenta: "\x1b[35m", // purple
+      cyan: "\x1b[36m",
+      white: "\x1b[37m",
+      reset: "\x1b[0m",
+    };
+    return `${colors[color] || ""}${text}${colors.reset}`;
+  };
+
   const printPrompt = useCallback(() => {
     commandRef.current = "";
     if (xtermRef.current) {
-      xtermRef.current.write(`\r\n${cwdRef.current} $ `);
+      const user = colorText("orbit", "green");
+      const sep = colorText(" / ", "magenta");
+      const dollar = colorText("$ ", "white");
+      xtermRef.current.write(`\r\n${user}${sep}${dollar}`);
     }
   }, []);
 
+  // ---------------- Terminal Initialization ----------------
   useEffect(() => {
-    // Initialize Terminal on first render
     if (!xtermRef.current && terminalRef.current) {
       const term = new Terminal({
         cursorBlink: true,
@@ -85,38 +102,26 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
       });
       term.loadAddon(fitAddonRef.current);
       term.open(terminalRef.current);
-      
-      xtermRef.current = term; 
-      
+      xtermRef.current = term;
       fitAddonRef.current.fit();
       printPrompt();
     }
 
-    // Initialize WebSocket connection
     if (!wsRef.current) {
       wsRef.current = new WebSocket(WEBSOCKET_URL);
-      wsRef.current.onopen = () => {
-        // xtermRef.current?.writeln("Connected to execution server.");
-      }
-      wsRef.current.onclose = () => {
-        // xtermRef.current?.writeln(
-        //   "\r\n\x1b[31mDisconnected from execution server.\x1b[0m"
-        // );
-      }
+      wsRef.current.onopen = () => {};
+      wsRef.current.onclose = () => {};
       wsRef.current.onerror = () =>
-        xtermRef.current?.writeln(
-          "\r\n\x1b[31mConnection to execution server failed.\x1b[0m"
-        );
+        xtermRef.current?.writeln(colorText("\r\nConnection failed", "red"));
 
       wsRef.current.onmessage = (event) => {
         const message = JSON.parse(event.data);
         switch (message.type) {
           case "stdout":
-            // The 'convertEol' option handles the \n to \r\n conversion.
             xtermRef.current?.write(message.data);
             break;
           case "stderr":
-            xtermRef.current?.write(`\x1b[31m${message.data}\x1b[0m`);
+            xtermRef.current?.write(colorText(message.data, "red"));
             break;
           case "exit":
             setIsExecuting(false);
@@ -128,7 +133,7 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
       };
     }
 
-    // --- Command Handling ---
+    // ---------------- Command Handling ----------------
     const handleCommand = (cmd) => {
       const [base, ...args] = cmd.trim().split(" ");
       if (!base) {
@@ -144,7 +149,7 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
         }
         if (wsRef.current?.readyState !== WebSocket.OPEN) {
           xtermRef.current.writeln(
-            "\x1b[31mNot connected to execution server.\x1b[0m"
+            colorText("Not connected to execution server.", "red")
           );
           printPrompt();
           return;
@@ -160,15 +165,19 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
         return;
       }
 
-      // --- Handle all other local commands (ls, cd, etc.) ---
       const localCommands = {
         ls: () => {
           const folder = findNodeByPath(fileSystem, cwdRef.current);
-          return folder && folder.children
-            ? folder.children.map((f) => f.name).join("  ")
-            : "";
+          if (!folder || !folder.children) return "";
+          return folder.children
+            .map((f) =>
+              f.type === "folder"
+                ? colorText(f.name, "blue")
+                : colorText(f.name, "cyan")
+            )
+            .join("  ");
         },
-        pwd: () => cwdRef.current,
+        pwd: () => colorText(cwdRef.current, "blue"),
         cd: () => {
           if (!args[0]) return "";
           const targetPath = normalizePath(
@@ -178,7 +187,10 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
           if (folder && folder.type === "folder") {
             cwdRef.current = targetPath;
           } else {
-            return `cd: no such file or directory: ${args[0]}`;
+            return colorText(
+              `cd: no such file or directory: ${args[0]}`,
+              "red"
+            );
           }
           return "";
         },
@@ -220,7 +232,7 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
             const file = findNodeByPath(fileSystem, filePath);
             return file && file.type === "file"
               ? file.content
-              : "File not found";
+              : colorText("File not found", "red");
           }
         },
         clear: () => xtermRef.current.clear(),
@@ -230,7 +242,9 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
         const output = localCommands[base]();
         if (output) xtermRef.current.writeln(output);
       } else {
-        xtermRef.current.writeln(`Command not found: ${base}`);
+        xtermRef.current.writeln(
+          colorText(`Command not found: ${base}`, "red")
+        );
       }
       printPrompt();
     };
@@ -242,18 +256,14 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
           term.write("\r\n");
           wsRef.current?.send(JSON.stringify({ type: "stdin", data: "\n" }));
         } else if (domEvent.key === "Backspace") {
-          if (term.buffer.active.cursorX > 0) {
-            term.write("\b \b");
-          }
+          if (term.buffer.active.cursorX > 0) term.write("\b \b");
         } else if (!domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey) {
           term.write(key);
           wsRef.current?.send(JSON.stringify({ type: "stdin", data: key }));
         }
       } else {
-        // --- Command mode: Build and handle local commands ---
-        if (domEvent.key === "Enter") {
-          handleCommand(commandRef.current);
-        } else if (domEvent.key === "Backspace") {
+        if (domEvent.key === "Enter") handleCommand(commandRef.current);
+        else if (domEvent.key === "Backspace") {
           if (commandRef.current.length > 0) {
             commandRef.current = commandRef.current.slice(0, -1);
             term.write("\b \b");
@@ -282,6 +292,7 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
     deleteNodeByPath,
   ]);
 
+  // ---------------- Terminal UI ----------------
   return (
     <Resizable
       defaultSize={{ width: "100%", height: "30%" }}
@@ -303,8 +314,7 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
       <div className={styles["terminal-header"]}>
         <span className={styles["terminal-header-options"]}>Terminal</span>
         <div onClick={onClose} style={{ cursor: "pointer" }}>
-          {" "}
-          <X size={16} />{" "}
+          <X size={16} />
         </div>
       </div>
       <div

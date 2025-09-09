@@ -148,6 +148,6 @@ wss.on("connection", (ws) => {
 
 server.listen(PORT, () => {
   console.log(
-    `🚀 Multi-language execution server listening on http://localhost:${PORT}`
+    `Multi-language execution server listening on http://localhost:${PORT}`
   );
 });
