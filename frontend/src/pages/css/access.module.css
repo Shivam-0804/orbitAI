@@ -1,0 +1,130 @@
+.parent {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e0f7fa, #b3e5fc);
+  font-family: "Poppins", sans-serif;
+}
+
+.container {
+  max-width: 90rem;
+  width: 90%;
+  min-height: 55rem;
+  display: flex;
+  border-radius: 1.5rem;
+  background-color: white;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.img_container {
+  position: relative;
+  flex: 1;
+  min-width: 45%;
+}
+
+.img_style {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.img_active {
+  opacity: 1;
+}
+
+.dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 100;
+}
+
+.dot {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background: #b0bec5;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.dot:hover {
+  transform: scale(1.1);
+}
+
+.dot_active {
+  background: #3949ab;
+  transform: scale(1.2);
+}
+
+.back_button {
+  z-index: 100;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: background-color 0.3s ease;
+}
+
+.back_button:hover {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.back_arrow {
+  color: #3949ab;
+  height: 25px;
+  cursor: pointer;
+}
+
+.content_container {
+  padding: 3rem 2.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.login_header {
+  margin-bottom: 2rem;
+}
+.login_header_text {
+  color: #333;
+  font-size: 1.8rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+.selected_option {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #3949ab;
+  margin-top: 0;
+}
+/* footer */
+.footer {
+  color: black;
+  font-size: 1.4rem;
+  position: absolute;
+  bottom: 3rem;
+}
+.guest_login {
+  color: #3949ab;
+}

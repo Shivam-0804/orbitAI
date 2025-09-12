@@ -7,7 +7,7 @@ import TerminalWindow from "../components/terminal.jsx";
 import Menu from "../components/menu.jsx";
 import Footer from "../components/footer.jsx";
 
-import "./global.css";
+import "../global.css"
 
 const EditorWindow = lazy(() => import("../components/editor.jsx"));
 
@@ -33,7 +33,7 @@ const initialFileSystem = [
   },
 ];
 
-export default function App() {
+export default function Orbit() {
   const [option, setOption] = useState(0);
 
   const [fileSystem, setFileSystem] = useState(initialFileSystem);

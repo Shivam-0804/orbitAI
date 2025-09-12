@@ -1,0 +1,107 @@
+/* input fields */
+.input_fields {
+  position: relative;
+  width: 90%;
+}
+.input_fields > * {
+  margin-bottom: 1.5rem;
+}
+.name_container {
+  display: flex;
+  gap: 1rem;
+}
+
+.input_name {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+  font-size: 1.6rem;
+  padding: 1rem;
+  border: 1px solid #3949ab;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+.input_name:focus {
+  outline: 1px solid #3949ab;
+}
+.mail_input {
+  width: 100%;
+  font-size: 1.6rem;
+  padding: 1rem;
+  border: 1px solid #3949ab;
+  border-radius: 5px;
+}
+.mail_input:focus {
+  outline: 1px solid #3949ab;
+}
+.password_input {
+  width: 90%;
+  font-size: 1.6rem;
+  padding: 1rem;
+  border: none;
+  border-radius: 5px;
+  outline: none;
+}
+
+.password_container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  border: 1px solid #3949ab;
+}
+
+.password_container:focus-within {
+  outline: 1px solid #3949ab;
+}
+
+.eye_style {
+  position: absolute;
+  color: #3949ab;
+  right: 1rem;
+  height: 1.6rem;
+  cursor: pointer;
+}
+
+.forgot_password {
+  margin-top: 5px;
+  color: #3949ab;
+  cursor: pointer;
+}
+
+.submit_button {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #3949ab, #5c6bc0);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 4px 10px rgba(57, 73, 171, 0.3);
+}
+
+.submit_button:hover {
+  background: linear-gradient(135deg, #303f9f, #3f51b5);
+  box-shadow: 0 6px 14px rgba(57, 73, 171, 0.4);
+  transform: translateY(-2px);
+}
+
+.submit_button:active {
+  transform: translateY(1px);
+  box-shadow: 0 3px 8px rgba(57, 73, 171, 0.2);
+}
+/* footer */
+.footer {
+  color: black;
+  font-size: 1.4rem;
+  position: absolute;
+  bottom: 3rem;
+}
+.guest_login {
+  color: #3949ab;
+}

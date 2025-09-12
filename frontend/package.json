@@ -20,6 +20,7 @@
     "re-resizable": "^6.11.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-router-dom": "^7.8.2",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0"
   },
