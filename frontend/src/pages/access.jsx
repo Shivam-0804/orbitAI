@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "./css/access.module.css";
-import { ArrowLeft } from "lucide-react";
+import { MoveLeft } from "lucide-react";
 
 import Login from "../components/login";
 import Signup from "../components/signup";
@@ -48,7 +48,7 @@ export default function Access() {
           </div>
           {/*back button*/}
           <Link to="/" className={styles.back_button}>
-            <ArrowLeft className={styles.back_arrow} />
+            <MoveLeft className={styles.back_arrow} />
           </Link>
         </div>
         <div className={styles.content_container}>

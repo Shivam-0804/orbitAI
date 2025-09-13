@@ -21,6 +21,8 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.8.2",
+    "react-terminal-ui": "^1.4.0",
+    "react-type-animation": "^3.2.0",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0"
   },
