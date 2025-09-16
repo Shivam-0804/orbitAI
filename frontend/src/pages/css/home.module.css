@@ -38,6 +38,9 @@
   color: rgb(150, 151, 151);
   cursor: pointer;
 }
+.options_item{
+  text-decoration: none;
+}
 .options_item:hover {
   color: rgb(255, 255, 255);
 }

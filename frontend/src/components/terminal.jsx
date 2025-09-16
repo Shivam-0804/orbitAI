@@ -5,8 +5,18 @@ import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
 import styles from "./css/terminal.module.css";
+import {
+  normalizePath,
+  addNodeByPath,
+  deleteNodeByPath,
+  findNodeByPath,
+} from "../utils/terminal_helper/curd";
 
-const WEBSOCKET_URL = "ws://localhost:3001";
+// Import loadPyodide and the custom hooks
+import { loadPyodide } from "pyodide";
+import usePip from "../compilers/pip";
+import usePythonCompiler from "../compilers/pythonCompiler";
+import useServerCompiler from "../compilers/serverCompiler";
 
 export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
   const [isResizing, setIsResizing] = useState(false);
@@ -15,56 +25,67 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
   const fitAddonRef = useRef(new FitAddon());
   const cwdRef = useRef("/");
 
-  const wsRef = useRef(null);
-  const [isExecuting, setIsExecuting] = useState(false);
+  const inputBuffer = useRef("");
   const commandRef = useRef("");
 
-  // ---------------- Helper Functions ----------------
-  const normalizePath = (path) => {
-    const parts = path.split("/").filter(Boolean);
-    const stack = [];
-    for (let part of parts) {
-      if (part === "..") stack.pop();
-      else if (part !== ".") stack.push(part);
-    }
-    return "/" + stack.join("/");
-  };
+  const pyodideRef = useRef(null);
+  const [isPyodideReady, setIsPyodideReady] = useState(false);
 
-  const findNodeByPath = useCallback((nodes, path) => {
-    for (let node of nodes) {
-      if (node.path === path) return node;
-      if (node.type === "folder" && node.children) {
-        const found = findNodeByPath(node.children, path);
-        if (found) return found;
-      }
-    }
-    return null;
-  }, []);
+  useEffect(() => {
+    if (xtermRef.current) return;
 
-  const addNodeByPath = useCallback((nodes, parentPath, newNode) => {
-    return nodes.map((node) => {
-      if (node.path === parentPath) {
-        return { ...node, children: [...(node.children || []), newNode] };
-      }
-      if (node.type === "folder" && node.children) {
-        return {
-          ...node,
-          children: addNodeByPath(node.children, parentPath, newNode),
-        };
-      }
-      return node;
+    const term = new Terminal({
+      cursorBlink: true,
+      fontSize: 14,
+      theme: { background: "#181818", foreground: "#ffffff" },
+      scrollback: 1000,
+      convertEol: true,
     });
+    term.loadAddon(fitAddonRef.current);
+    term.open(terminalRef.current);
+    xtermRef.current = term;
+    fitAddonRef.current.fit();
+
+    async function initializePyodide() {
+      try {
+        const pyodide = await loadPyodide({
+          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.2/full/",
+        });
+        pyodideRef.current = pyodide;
+        setIsPyodideReady(true);
+        printPrompt();
+      } catch (error) {
+        term.writeln(`\r\n\x1b[31mFailed to load Pyodide: ${error}\x1b[0m`);
+      }
+    }
+    initializePyodide();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const deleteNodeByPath = useCallback((nodes, path) => {
-    return nodes.filter((node) => {
-      if (node.path === path) return false;
-      if (node.type === "folder" && node.children) {
-        node.children = deleteNodeByPath(node.children, path);
-      }
-      return true;
-    });
-  }, []);
+  const {
+    runFile: runWSFile,
+    sendInput: sendWSInput,
+    isExecuting: isWSExecuting,
+  } = useServerCompiler(
+    fileSystem,
+    cwdRef.current,
+    (data) => xtermRef.current?.write(`${data}`),
+    () => printPrompt()
+  );
+
+  const pythonCompiler = usePythonCompiler({
+    pyodide: pyodideRef.current,
+    isPyodideReady,
+    fileSystem,
+  });
+
+  const pipInstaller = usePip({
+    pyodide: pyodideRef.current,
+    isPyodideReady,
+  });
+
+  const isAnyExecuting = () =>
+    isWSExecuting || pythonCompiler.isExecuting || pipInstaller.isInstalling;
 
   const colorText = (text, color) => {
     const colors = {
@@ -72,7 +93,7 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
       green: "\x1b[32m",
       yellow: "\x1b[33m",
       blue: "\x1b[34m",
-      magenta: "\x1b[35m", // purple
+      magenta: "\x1b[35m",
       cyan: "\x1b[36m",
       white: "\x1b[37m",
       reset: "\x1b[0m",
@@ -90,78 +111,58 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
     }
   }, []);
 
-  // ---------------- Terminal Initialization ----------------
   useEffect(() => {
-    if (!xtermRef.current && terminalRef.current) {
-      const term = new Terminal({
-        cursorBlink: true,
-        fontSize: 14,
-        theme: { background: "#181818", foreground: "#ffffff" },
-        scrollback: 1000,
-        convertEol: true,
-      });
-      term.loadAddon(fitAddonRef.current);
-      term.open(terminalRef.current);
-      xtermRef.current = term;
-      fitAddonRef.current.fit();
-      printPrompt();
-    }
+    if (!xtermRef.current) return;
 
-    if (!wsRef.current) {
-      wsRef.current = new WebSocket(WEBSOCKET_URL);
-      wsRef.current.onopen = () => {};
-      wsRef.current.onclose = () => {};
-      wsRef.current.onerror = () =>
-        xtermRef.current?.writeln(colorText("\r\nConnection failed", "red"));
-
-      wsRef.current.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        switch (message.type) {
-          case "stdout":
-            xtermRef.current?.write(message.data);
-            break;
-          case "stderr":
-            xtermRef.current?.write(colorText(message.data, "red"));
-            break;
-          case "exit":
-            setIsExecuting(false);
-            printPrompt();
-            break;
-          default:
-            console.warn("Unknown message:", message);
-        }
-      };
-    }
-
-    // ---------------- Command Handling ----------------
     const handleCommand = (cmd) => {
       const [base, ...args] = cmd.trim().split(" ");
-      if (!base) {
-        printPrompt();
+      if (!base) return printPrompt();
+      xtermRef.current.writeln("");
+
+      if (base === "pip") {
+        if (args[0] === "install") {
+          pipInstaller.install(args[1], {
+            stdout: (data) => xtermRef.current.write(data),
+            stderr: (data) => xtermRef.current.write(colorText(data, "red")),
+            onExit: printPrompt,
+          });
+          return;
+        } else {
+          xtermRef.current.writeln("Usage: pip install <package_name>");
+          printPrompt();
+          return;
+        }
+      }
+
+      if (base === "python") {
+        if (!args[0]) {
+          xtermRef.current.writeln("Usage: python <filename>");
+          return printPrompt();
+        }
+        const targetPath = normalizePath(
+          args[0].startsWith("/") ? args[0] : `${cwdRef.current}/${args[0]}`
+        );
+        pythonCompiler.runFile(targetPath, {
+          stdout: (data) => xtermRef.current.write(data),
+          stderr: (data) => xtermRef.current.write(colorText(data, "red")),
+          onExit: printPrompt,
+        });
         return;
       }
 
       if (base === "run") {
         if (!args[0]) {
           xtermRef.current.writeln("Usage: run <filename>");
-          printPrompt();
-          return;
-        }
-        if (wsRef.current?.readyState !== WebSocket.OPEN) {
-          xtermRef.current.writeln(
-            colorText("Not connected to execution server.", "red")
-          );
-          printPrompt();
-          return;
+          return printPrompt();
         }
         const targetPath = normalizePath(
           args[0].startsWith("/") ? args[0] : `${cwdRef.current}/${args[0]}`
         );
-        setIsExecuting(true);
-        xtermRef.current.writeln("");
-        wsRef.current.send(
-          JSON.stringify({ type: "execute", entryPath: targetPath, fileSystem })
-        );
+        runWSFile(targetPath, {
+          stdout: (data) => xtermRef.current.write(data),
+          stderr: (data) => xtermRef.current.write(colorText(data, "red")),
+          onExit: printPrompt,
+        });
         return;
       }
 
@@ -240,30 +241,35 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
 
       if (localCommands[base]) {
         const output = localCommands[base]();
-        if (output) xtermRef.current.writeln(output);
+        if (output) xtermRef.current.write(output);
       } else {
-        xtermRef.current.writeln(
-          colorText(`Command not found: ${base}`, "red")
-        );
+        xtermRef.current.write(colorText(`Command not found: ${base}`, "red"));
       }
       printPrompt();
     };
 
     const onKeyDisposable = xtermRef.current.onKey(({ key, domEvent }) => {
       const term = xtermRef.current;
-      if (isExecuting) {
+      if (isAnyExecuting()) {
         if (domEvent.key === "Enter") {
           term.write("\r\n");
-          wsRef.current?.send(JSON.stringify({ type: "stdin", data: "\n" }));
+          if (isWSExecuting) sendWSInput(inputBuffer.current + "\n");
+          else if (pythonCompiler.isExecuting)
+            pythonCompiler.sendInput(inputBuffer.current + "\n");
+          inputBuffer.current = "";
         } else if (domEvent.key === "Backspace") {
-          if (term.buffer.active.cursorX > 0) term.write("\b \b");
+          if (inputBuffer.current.length > 0) {
+            inputBuffer.current = inputBuffer.current.slice(0, -1);
+            term.write("\b \b");
+          }
         } else if (!domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey) {
+          inputBuffer.current += key;
           term.write(key);
-          wsRef.current?.send(JSON.stringify({ type: "stdin", data: key }));
         }
       } else {
-        if (domEvent.key === "Enter") handleCommand(commandRef.current);
-        else if (domEvent.key === "Backspace") {
+        if (domEvent.key === "Enter") {
+          handleCommand(commandRef.current);
+        } else if (domEvent.key === "Backspace") {
           if (commandRef.current.length > 0) {
             commandRef.current = commandRef.current.slice(0, -1);
             term.write("\b \b");
@@ -282,17 +288,9 @@ export default function TerminalWindow({ fileSystem, setFileSystem, onClose }) {
       onKeyDisposable.dispose();
       window.removeEventListener("resize", handleResize);
     };
-  }, [
-    isExecuting,
-    fileSystem,
-    setFileSystem,
-    printPrompt,
-    findNodeByPath,
-    addNodeByPath,
-    deleteNodeByPath,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fileSystem, setFileSystem, isPyodideReady, printPrompt]);
 
-  // ---------------- Terminal UI ----------------
   return (
     <Resizable
       defaultSize={{ width: "100%", height: "30%" }}
