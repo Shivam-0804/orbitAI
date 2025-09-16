@@ -9,7 +9,10 @@ const os = require("os");
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
-const PORT = 3001;
+import dotenv from "dotenv";
+dotenv.config();
+
+const PORT = process.env.PORT || 3001;
 
 // Helper to recursively write the file structure received from the client
 const writeFiles = async (basePath, files) => {
@@ -146,8 +149,8 @@ wss.on("connection", (ws) => {
   });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(
-    `Multi-language execution server listening on http://localhost:${PORT}`
+    `Multi-language execution server listening on http://0.0.0.0:${PORT}`
   );
 });
