@@ -9,10 +9,7 @@ const os = require("os");
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
-import dotenv from "dotenv";
-dotenv.config();
-
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
 
 // Helper to recursively write the file structure received from the client
 const writeFiles = async (basePath, files) => {
@@ -45,11 +42,10 @@ wss.on("connection", (ws) => {
       const tempDir = path.join(os.tmpdir(), sessionId);
 
       try {
-        // 1. Create a temporary directory and write all files to it
         await fs.ensureDir(tempDir);
         await writeFiles(tempDir, fileSystem[0].children);
 
-        const entryFile = path.join(tempDir, entryPath.substring(1)); // Remove leading '/'
+        const entryFile = path.join(tempDir, entryPath.substring(1));
         const fileExtension = path.extname(entryFile);
         const baseName = path.basename(entryFile, fileExtension);
 
@@ -90,7 +86,6 @@ wss.on("connection", (ws) => {
           });
         };
 
-        // 2. Determine the correct runtime based on file extension
         switch (fileExtension) {
           case ".js":
             runProcess("node", [entryFile]);
@@ -149,8 +144,8 @@ wss.on("connection", (ws) => {
   });
 });
 
-server.listen(PORT, "0.0.0.0", () => {
+server.listen(PORT, () => {
   console.log(
-    `Multi-language execution server listening on http://0.0.0.0:${PORT}`
+    `Multi-language execution server listening on http://localhost:${PORT}`
   );
 });
