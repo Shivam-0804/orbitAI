@@ -8,8 +8,12 @@ function Filetab({
   handleFileClick,
   handleDelete,
   handleStartCreate,
+  handleStartRename,
   isCreating,
+  isRenaming,
   activeTab,
+  error,
+  setError,
 }) {
   const [isResizing, setIsResizing] = useState(false);
 
@@ -38,8 +42,12 @@ function Filetab({
             handleFileClick={handleFileClick}
             handleDelete={handleDelete}
             handleStartCreate={handleStartCreate}
+            handleStartRename={handleStartRename}
             isCreating={isCreating}
+            isRenaming={isRenaming}
             activeTab={activeTab}
+            error={error}
+            setError={setError}
           />
         </Resizable>
       ) : null}
@@ -47,4 +55,3 @@ function Filetab({
   );
 }
 export default Filetab;
-

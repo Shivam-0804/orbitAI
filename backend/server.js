@@ -42,11 +42,10 @@ wss.on("connection", (ws) => {
       const tempDir = path.join(os.tmpdir(), sessionId);
 
       try {
-        // 1. Create a temporary directory and write all files to it
         await fs.ensureDir(tempDir);
         await writeFiles(tempDir, fileSystem[0].children);
 
-        const entryFile = path.join(tempDir, entryPath.substring(1)); // Remove leading '/'
+        const entryFile = path.join(tempDir, entryPath.substring(1));
         const fileExtension = path.extname(entryFile);
         const baseName = path.basename(entryFile, fileExtension);
 
@@ -87,7 +86,6 @@ wss.on("connection", (ws) => {
           });
         };
 
-        // 2. Determine the correct runtime based on file extension
         switch (fileExtension) {
           case ".js":
             runProcess("node", [entryFile]);

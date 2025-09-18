@@ -20,8 +20,8 @@
   position: relative;
   display: inline-block;
   cursor: pointer;
-  padding: 2px;
-  border-radius: 2px;
+  padding: 3px 4px;
+  border-radius: 4px;
 }
 
 .options:hover {
@@ -38,12 +38,13 @@
   top: 100%;
   left: 0;
   display: none;
-  padding: 1rem;
-  min-width: 20rem;
-  background-color: #181818;
-  border: 0.5px solid #a09f9f;
+  padding: 1rem 2rem;
+  min-width: 30rem;
+  background-color: #1f1f1f;
+  border: 0.5px solid #535353;
   border-radius: 4px;
   z-index: 100;
+  font-size: 1.4rem;
 }
 
 .options:hover .suboptions {
@@ -62,12 +63,20 @@
   padding: 0.5rem;
   border-radius: 2px;
   transition: background 0.2s ease;
+  
 }
 
 .list li:hover {
   background-color: #4052b6b0;
   border: 1px solid #4052b6;
 }
+
+.divider{
+  margin: 1rem 0 1rem 0;
+  border: 0.5px solid #535353;
+}
+
+/* right side option */
 
 .moreOptions {
   display: flex;
