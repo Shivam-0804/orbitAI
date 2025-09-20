@@ -29,7 +29,7 @@
 }
 
 .optionsHeader {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 300;
 }
 
@@ -38,8 +38,8 @@
   top: 100%;
   left: 0;
   display: none;
-  padding: 1rem 2rem;
-  min-width: 30rem;
+  padding: 5px;
+  min-width: 25rem;
   background-color: #1f1f1f;
   border: 0.5px solid #535353;
   border-radius: 4px;
@@ -47,7 +47,7 @@
   font-size: 1.4rem;
 }
 
-.options:hover .suboptions {
+.displayOptions {
   display: inline-block;
 }
 
@@ -62,20 +62,51 @@
   font-size: 1.2rem;
   padding: 0.5rem;
   border-radius: 2px;
-  transition: background 0.2s ease;
-  
 }
 
 .list li:hover {
   background-color: #4052b6b0;
-  border: 1px solid #4052b6;
 }
 
-.divider{
-  margin: 1rem 0 1rem 0;
+.divider {
+  margin: 0.5rem 0 0.5rem 0;
   border: 0.5px solid #535353;
 }
 
+.listItems {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.subCatWrapper {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  z-index: 200;
+  border: 0.5px solid #535353;
+  border-radius: 4px;
+  min-width: 25rem;
+  background-color: #1f1f1f;
+  padding: 0.5rem;
+}
+
+.listItems:hover > .subCatWrapper {
+  display: block;
+}
+
+.subCat {
+  list-style: none;
+  margin: 0;
+  font-size: 1.2rem;
+  border-radius: 4px;
+}
+
+.subCat li:hover {
+  background-color: #4052b6b0;
+}
 /* right side option */
 
 .moreOptions {

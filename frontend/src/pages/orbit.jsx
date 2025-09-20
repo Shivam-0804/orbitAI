@@ -7,6 +7,8 @@ import TerminalWindow from "../components/terminal.jsx";
 import Menu from "../components/menu.jsx";
 import Footer from "../components/footer.jsx";
 
+import LoadAnimation from "../ui/loadingAnimation.jsx";
+
 import "../global.css";
 
 const EditorWindow = lazy(() => import("../components/editor.jsx"));
@@ -41,6 +43,7 @@ export default function Orbit() {
   const [isCreating, setIsCreating] = useState(null);
   const [isRenaming, setIsRenaming] = useState(null);
   const [error, setError] = useState(false);
+  const [showTerminal, setShowTerminal] = useState(false);
 
   const findNodeByPath = (nodes, path) => {
     for (const node of nodes) {
@@ -78,33 +81,49 @@ export default function Orbit() {
       return acc;
     }, []);
   };
-  
+
   const updateChildrenPaths = (children, oldParentPath, newParentPath) => {
-      return children.map(child => {
-          const newPath = child.path.replace(oldParentPath, newParentPath);
-          const updatedChild = { ...child, path: newPath, parentPath: newParentPath };
-          if (child.type === 'folder' && child.children?.length > 0) {
-              updatedChild.children = updateChildrenPaths(child.children, child.path, newPath);
-          }
-          return updatedChild;
-      });
+    return children.map((child) => {
+      const newPath = child.path.replace(oldParentPath, newParentPath);
+      const updatedChild = {
+        ...child,
+        path: newPath,
+        parentPath: newParentPath,
+      };
+      if (child.type === "folder" && child.children?.length > 0) {
+        updatedChild.children = updateChildrenPaths(
+          child.children,
+          child.path,
+          newPath
+        );
+      }
+      return updatedChild;
+    });
   };
-  
+
   const renameNodeByPath = (nodes, path, newName, parentPath) => {
-      return nodes.map((node) => {
-        if (node.path === path) {
-          const newPath = parentPath === '/' ? `/${newName}` : `${parentPath}/${newName}`;
-          const updatedNode = { ...node, name: newName, path: newPath };
-          if (node.type === "folder" && node.children?.length > 0) {
-            updatedNode.children = updateChildrenPaths(node.children, node.path, newPath);
-          }
-          return updatedNode;
+    return nodes.map((node) => {
+      if (node.path === path) {
+        const newPath =
+          parentPath === "/" ? `/${newName}` : `${parentPath}/${newName}`;
+        const updatedNode = { ...node, name: newName, path: newPath };
+        if (node.type === "folder" && node.children?.length > 0) {
+          updatedNode.children = updateChildrenPaths(
+            node.children,
+            node.path,
+            newPath
+          );
         }
-        if (node.type === "folder" && node.children) {
-          return { ...node, children: renameNodeByPath(node.children, path, newName, node.path) };
-        }
-        return node;
-      });
+        return updatedNode;
+      }
+      if (node.type === "folder" && node.children) {
+        return {
+          ...node,
+          children: renameNodeByPath(node.children, path, newName, node.path),
+        };
+      }
+      return node;
+    });
   };
 
   const updateNodeContentByPath = (nodes, path, newContent) => {
@@ -119,7 +138,6 @@ export default function Orbit() {
       return node;
     });
   };
-
 
   const handleStartCreate = (type, parentPath) => {
     const handleCreate = (name) => {
@@ -139,12 +157,20 @@ export default function Orbit() {
       }
 
       setError(false);
-      const newPath = effectiveParentPath === '/' ? `/${name}` : `${effectiveParentPath}/${name}`;
-      const newNode = { type, name, path: newPath, parentPath: effectiveParentPath };
+      const newPath =
+        effectiveParentPath === "/"
+          ? `/${name}`
+          : `${effectiveParentPath}/${name}`;
+      const newNode = {
+        type,
+        name,
+        path: newPath,
+        parentPath: effectiveParentPath,
+      };
 
       if (type === "folder") newNode.children = [];
       else newNode.content = "";
-      
+
       setFileSystem((fs) => addNodeByPath(fs, effectiveParentPath, newNode));
       setIsCreating(null);
 
@@ -154,7 +180,15 @@ export default function Orbit() {
       }
     };
 
-    setIsCreating({ type, parentPath, onCancel: () => { setIsCreating(null); setError(false); }, onCreate: handleCreate });
+    setIsCreating({
+      type,
+      parentPath,
+      onCancel: () => {
+        setIsCreating(null);
+        setError(false);
+      },
+      onCreate: handleCreate,
+    });
   };
 
   const handleStartRename = (node, parentPath) => {
@@ -169,28 +203,41 @@ export default function Orbit() {
       const parentNode = findNodeByPath(fileSystem, effectiveParentPath);
       const siblings = parentNode ? parentNode.children : [];
 
-      if (siblings.some((child) => child.name === newName && child.path !== node.path)) {
+      if (
+        siblings.some(
+          (child) => child.name === newName && child.path !== node.path
+        )
+      ) {
         setError(true);
         return;
       }
 
       setError(false);
       const oldPath = node.path;
-      const newPath = effectiveParentPath === '/' ? `/${newName}` : `${effectiveParentPath}/${newName}`;
+      const newPath =
+        effectiveParentPath === "/"
+          ? `/${newName}`
+          : `${effectiveParentPath}/${newName}`;
 
-      setFileSystem((fs) => renameNodeByPath(fs, oldPath, newName, effectiveParentPath));
+      setFileSystem((fs) =>
+        renameNodeByPath(fs, oldPath, newName, effectiveParentPath)
+      );
 
-      setOpenTabs((tabs) => tabs.map((tab) => {
+      setOpenTabs((tabs) =>
+        tabs.map((tab) => {
           if (tab.path.startsWith(`${oldPath}/`)) {
-              return { ...tab, path: newPath + tab.path.substring(oldPath.length) };
+            return {
+              ...tab,
+              path: newPath + tab.path.substring(oldPath.length),
+            };
           }
           if (tab.path === oldPath) {
-              return { ...tab, name: newName, path: newPath };
+            return { ...tab, name: newName, path: newPath };
           }
           return tab;
         })
       );
-      
+
       if (activeTab && activeTab.startsWith(oldPath)) {
         setActiveTab(newPath + activeTab.substring(oldPath.length));
       }
@@ -198,7 +245,15 @@ export default function Orbit() {
       setIsRenaming(null);
     };
 
-    setIsRenaming({ node, parentPath, onCancel: () => { setIsRenaming(null); setError(false); }, onRename: handleRename });
+    setIsRenaming({
+      node,
+      parentPath,
+      onCancel: () => {
+        setIsRenaming(null);
+        setError(false);
+      },
+      onRename: handleRename,
+    });
   };
 
   const handleDelete = (path) => {
@@ -208,7 +263,9 @@ export default function Orbit() {
 
   const handleContentChange = (path, newContent) => {
     setOpenTabs((tabs) =>
-      tabs.map((tab) => tab.path === path ? { ...tab, content: newContent } : tab)
+      tabs.map((tab) =>
+        tab.path === path ? { ...tab, content: newContent } : tab
+      )
     );
     setFileSystem((fs) => updateNodeContentByPath(fs, path, newContent));
   };
@@ -221,24 +278,26 @@ export default function Orbit() {
   };
 
   const handleCloseTab = (path, isDeleting = false) => {
-    const newTabs = openTabs.filter(tab => isDeleting ? !tab.path.startsWith(path) : tab.path !== path);
+    const newTabs = openTabs.filter((tab) =>
+      isDeleting ? !tab.path.startsWith(path) : tab.path !== path
+    );
     setOpenTabs(newTabs);
 
     if (activeTab === path || (isDeleting && activeTab?.startsWith(path))) {
-        if(newTabs.length > 0) {
-            const tabIndex = openTabs.findIndex((tab) => tab.path === path);
-            const newActiveIndex = Math.max(0, tabIndex - 1);
-            setActiveTab(newTabs[newActiveIndex]?.path || null);
-        } else {
-            setActiveTab(null);
-        }
+      if (newTabs.length > 0) {
+        const tabIndex = openTabs.findIndex((tab) => tab.path === path);
+        const newActiveIndex = Math.max(0, tabIndex - 1);
+        setActiveTab(newTabs[newActiveIndex]?.path || null);
+      } else {
+        setActiveTab(null);
+      }
     }
   };
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       <Header />
-      <Menu initialFileSystem={initialFileSystem} />
+      <Menu initialFileSystem={initialFileSystem} setShowTerminal={setShowTerminal}/>
       <div style={{ display: "flex", flexGrow: 1, minHeight: 0, minWidth: 0 }}>
         <Options option={option} setOption={setOption} />
         <FileTab
@@ -254,9 +313,39 @@ export default function Orbit() {
           error={error}
           setError={setError}
         />
-        <div style={{ display: "flex", flexDirection: "column", flexGrow: 1, minHeight: 0, minWidth: 0, overflow: "hidden" }}>
-          <div style={{ flexGrow: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-            <Suspense fallback={<div className="center-flex" style={{backgroundColor: "#1e1e1e", color: "white"}}>Loading Editor...</div>}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flexGrow: 1,
+            minHeight: 0,
+            minWidth: 0,
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              flexGrow: 1,
+              minHeight: 0,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Suspense
+              fallback={
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "100%",
+                    width: "100%",
+                  }}
+                >
+                  <LoadAnimation />
+                </div>
+              }
+            >
               <EditorWindow
                 openTabs={openTabs}
                 activeTab={activeTab}
@@ -269,11 +358,12 @@ export default function Orbit() {
           <TerminalWindow
             fileSystem={fileSystem}
             setFileSystem={setFileSystem}
-            onClose={() => console.log("Close terminal")}
+            showTerminal={showTerminal}
+            setShowTerminal={setShowTerminal}
           />
         </div>
       </div>
-      <Footer />
+      <Footer showTerminal={showTerminal} setShowTerminal={setShowTerminal} />
     </div>
   );
 }
