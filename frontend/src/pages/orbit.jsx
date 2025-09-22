@@ -6,8 +6,8 @@ import FileTab from "../components/file-tab.jsx";
 import TerminalWindow from "../components/terminal.jsx";
 import Menu from "../components/menu.jsx";
 import Footer from "../components/footer.jsx";
-
 import LoadAnimation from "../ui/loadingAnimation.jsx";
+import AIWindow from "../components/chatWindow.jsx";
 
 import "../global.css";
 
@@ -295,75 +295,85 @@ export default function Orbit() {
   };
 
   return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      <Header />
-      <Menu initialFileSystem={initialFileSystem} setShowTerminal={setShowTerminal}/>
-      <div style={{ display: "flex", flexGrow: 1, minHeight: 0, minWidth: 0 }}>
-        <Options option={option} setOption={setOption} />
-        <FileTab
-          option={option}
-          fileSystem={fileSystem[0]?.children || []}
-          handleFileClick={handleFileClick}
-          handleDelete={handleDelete}
-          handleStartCreate={handleStartCreate}
-          handleStartRename={handleStartRename}
-          isCreating={isCreating}
-          isRenaming={isRenaming}
-          activeTab={activeTab}
-          error={error}
-          setError={setError}
+    <>
+      <AIWindow />
+      <div
+        style={{ height: "100vh", display: "flex", flexDirection: "column" }}
+      >
+        <Header />
+        <Menu
+          initialFileSystem={initialFileSystem}
+          setShowTerminal={setShowTerminal}
         />
         <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            flexGrow: 1,
-            minHeight: 0,
-            minWidth: 0,
-            overflow: "hidden",
-          }}
+          style={{ display: "flex", flexGrow: 1, minHeight: 0, minWidth: 0 }}
         >
+          <Options option={option} setOption={setOption} />
+          <FileTab
+            option={option}
+            fileSystem={fileSystem[0]?.children || []}
+            handleFileClick={handleFileClick}
+            handleDelete={handleDelete}
+            handleStartCreate={handleStartCreate}
+            handleStartRename={handleStartRename}
+            isCreating={isCreating}
+            isRenaming={isRenaming}
+            activeTab={activeTab}
+            error={error}
+            setError={setError}
+          />
           <div
             style={{
-              flexGrow: 1,
-              minHeight: 0,
               display: "flex",
               flexDirection: "column",
+              flexGrow: 1,
+              minHeight: 0,
+              minWidth: 0,
+              overflow: "hidden",
             }}
           >
-            <Suspense
-              fallback={
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "100%",
-                    width: "100%",
-                  }}
-                >
-                  <LoadAnimation />
-                </div>
-              }
+            <div
+              style={{
+                flexGrow: 1,
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+              }}
             >
-              <EditorWindow
-                openTabs={openTabs}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                handleCloseTab={handleCloseTab}
-                handleContentChange={handleContentChange}
-              />
-            </Suspense>
+              <Suspense
+                fallback={
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      height: "100%",
+                      width: "100%",
+                    }}
+                  >
+                    <LoadAnimation />
+                  </div>
+                }
+              >
+                <EditorWindow
+                  openTabs={openTabs}
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                  handleCloseTab={handleCloseTab}
+                  handleContentChange={handleContentChange}
+                />
+              </Suspense>
+            </div>
+            <TerminalWindow
+              fileSystem={fileSystem}
+              setFileSystem={setFileSystem}
+              showTerminal={showTerminal}
+              setShowTerminal={setShowTerminal}
+            />
           </div>
-          <TerminalWindow
-            fileSystem={fileSystem}
-            setFileSystem={setFileSystem}
-            showTerminal={showTerminal}
-            setShowTerminal={setShowTerminal}
-          />
         </div>
+        <Footer showTerminal={showTerminal} setShowTerminal={setShowTerminal} />
       </div>
-      <Footer showTerminal={showTerminal} setShowTerminal={setShowTerminal} />
-    </div>
+    </>
   );
 }

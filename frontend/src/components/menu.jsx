@@ -37,14 +37,14 @@ const menuItems = (initialFileSystem, setShowTerminal) => [
             [
               {
                 label: "Google Drive",
-                action: () => handleSubOptionClick("File", "Open File"),
+                action: () => handleSubOptionClick("File", "Google Drive"),
                 icon: HardDriveUpload,
               },
             ],
             [
               {
                 label: "GitHub",
-                action: () => handleSubOptionClick("File", "Open File"),
+                action: () => handleSubOptionClick("File", "GitHub"),
                 icon: Github,
               },
             ],
@@ -124,7 +124,11 @@ function MenuOption({ title, subOptions, activeMenu, setActiveMenu }) {
         {subOptions.map((group, groupIdx) => (
           <ul className={styles.list} key={groupIdx}>
             {group.map((item, idx) => (
-              <li key={idx} className={styles.listItems}>
+              <li
+                key={idx}
+                className={styles.listItems}
+                onMouseDown={(e) => handleItemClick(e, item.action)}
+              >
                 {item.label}
                 {item.shortcut && (
                   <span style={{ color: "#ccc" }}>{item.shortcut}</span>

@@ -2,10 +2,13 @@
 .input_fields {
   position: relative;
   width: 90%;
+  color: #e0e0e0;
 }
+
 .input_fields > * {
   margin-bottom: 1.5rem;
 }
+
 .name_container {
   display: flex;
   gap: 1rem;
@@ -20,20 +23,26 @@
   border: 1px solid #3949ab;
   border-radius: 5px;
   box-sizing: border-box;
+  background: #1e1e2f;
+  color: #e0e0e0;
 }
 .input_name:focus {
   outline: 1px solid #3949ab;
 }
+
 .mail_input {
   width: 100%;
   font-size: 1.6rem;
   padding: 1rem;
   border: 1px solid #3949ab;
   border-radius: 5px;
+  background: #1e1e2f;
+  color: #e0e0e0;
 }
 .mail_input:focus {
   outline: 1px solid #3949ab;
 }
+
 .password_input {
   width: 90%;
   font-size: 1.6rem;
@@ -41,6 +50,8 @@
   border: none;
   border-radius: 5px;
   outline: none;
+  background: #1e1e2f;
+  color: #e0e0e0;
 }
 
 .password_container {
@@ -48,9 +59,9 @@
   width: 100%;
   display: flex;
   align-items: center;
-  border: 1px solid transparent;
-  border-radius: 5px;
   border: 1px solid #3949ab;
+  border-radius: 5px;
+  background: #1e1e2f;
 }
 
 .password_container:focus-within {
@@ -67,7 +78,7 @@
 
 .forgot_password {
   margin-top: 5px;
-  color: #3949ab;
+  color: #5c6bc0;
   cursor: pointer;
 }
 
@@ -95,13 +106,22 @@
   transform: translateY(1px);
   box-shadow: 0 3px 8px rgba(57, 73, 171, 0.2);
 }
+
 /* footer */
 .footer {
-  color: black;
+  color: #bdbdbd;
   font-size: 1.4rem;
   position: absolute;
   bottom: 3rem;
 }
+
 .guest_login {
-  color: #3949ab;
+  color: #5c6bc0;
+}
+
+/* dark background */
+body {
+  background: #121212;
+  color: #e0e0e0;
+  font-family: sans-serif;
 }

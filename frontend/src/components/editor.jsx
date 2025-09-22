@@ -3,8 +3,6 @@ import styles from "./css/editor.module.css";
 import { File, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-// Prettier doesn't support C/C++/Java in standalone mode easily.
-// We only include languages that have readily available standalone plugins.
 const FORMATTABLE_LANGUAGES = ["javascript", "typescript", "css", "scss", "html", "json", "markdown", "python"];
 const SUGGESTION_LANGUAGES = ["javascript", "python", "css", "html", "c", "cpp", "java"];
 
