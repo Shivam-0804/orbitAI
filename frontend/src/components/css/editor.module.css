@@ -1,0 +1,92 @@
+.tabs {
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+  background-color: #161616;
+  color: white;
+}
+.subtabs {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  justify-content: space-evenly;
+  padding: 0.8rem;
+}
+.subtabs.active {
+  background-color: #1e1e1e;
+  border-top: 2px solid #4051b5;
+}
+
+.subtabs:hover {
+  background-color: #414141;
+}
+.subtabs-icons {
+  height: 1.2rem;
+}
+.subtabs-close {
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+.editor {
+  min-height: 0;
+  flex-grow: 1;
+  flex-shrink: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Empty editor background */
+.empty-bg {
+  background: radial-gradient(circle at center, #1c1c1c 0%, #121212 100%);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #a1a1aa;
+  gap: 1.5rem;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+/* Logo / Icon */
+.empty-img {
+  height: 10rem;
+  width: auto;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 0 12px rgba(0, 0, 0, 0.6));
+  opacity: 0.85;
+}
+
+/* Main tagline */
+.tagline {
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  color: #e5e7eb;
+  text-align: center;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Supporting text */
+.para {
+  font-size: 1.2rem;
+  max-width: 40rem;
+  text-align: center;
+  line-height: 1.7;
+  letter-spacing: 0.3px;
+  color: #9ca3af;
+  padding: 0 1rem;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

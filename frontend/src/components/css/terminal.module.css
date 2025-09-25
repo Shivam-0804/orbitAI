@@ -1,0 +1,115 @@
+/* --- Header --- */
+.terminalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #252526;
+  padding: 0 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid #333;
+  user-select: none;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.viewTab {
+  color: #cccccc;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-bottom: 2px solid transparent;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.viewTab:hover {
+  color: #ffffff;
+}
+
+.activeViewTab {
+  color: #ffffff;
+  border-bottom: 2px solid #3f52b5;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: #cccccc;
+}
+
+.actionIcon {
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+}
+
+.actionIcon:hover {
+  color: #ffffff;
+}
+
+/* --- Content & Tabs --- */
+.terminalContent {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  background-color: #181818;
+  overflow: hidden;
+}
+
+.terminalTabs {
+  display: flex;
+  flex-shrink: 0;
+  background-color: #252526;
+  border-bottom: 1px solid #333;
+}
+
+.terminalTab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 1.125rem;
+  cursor: pointer;
+  color: #999;
+  border-right: 1px solid #333;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.terminalTab:hover {
+  background-color: #333;
+  color: #ccc;
+}
+
+.activeTerminalTab {
+  background-color: #181818;
+  color: #ffffff;
+}
+
+.closeTabIcon {
+  opacity: 0.6;
+  border-radius: 50%;
+  padding: 1px;
+}
+
+.closeTabIcon:hover {
+  opacity: 1;
+  background-color: #555;
+}
+
+/* --- Xterm Container --- */
+.terminalsContainer {
+  flex-grow: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.terminalInstance {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}

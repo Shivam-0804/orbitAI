@@ -1,0 +1,130 @@
+.mainMenu {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 3rem;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background-color: #181818;
+  border-bottom: 0.1px solid #a09f9f;
+  color: white;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.options {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  padding: 3px 4px;
+  border-radius: 4px;
+}
+
+.options:hover {
+  background-color: #4052b6;
+}
+
+.optionsHeader {
+  font-size: 1.2rem;
+  font-weight: 300;
+}
+
+.suboptions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  display: none;
+  padding: 5px;
+  min-width: 25rem;
+  background-color: #1f1f1f;
+  border: 0.5px solid #535353;
+  border-radius: 4px;
+  z-index: 100;
+  font-size: 1.4rem;
+}
+
+.displayOptions {
+  display: inline-block;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.list li {
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  border-radius: 2px;
+}
+
+.list li:hover {
+  background-color: #4052b6b0;
+}
+
+.divider {
+  margin: 0.5rem 0 0.5rem 0;
+  border: 0.5px solid #535353;
+}
+
+.listItems {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.subCatWrapper {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  z-index: 200;
+  border: 0.5px solid #535353;
+  border-radius: 4px;
+  min-width: 25rem;
+  background-color: #1f1f1f;
+  padding: 0.5rem;
+}
+
+.listItems:hover > .subCatWrapper {
+  display: block;
+}
+
+.subCat {
+  list-style: none;
+  margin: 0;
+  font-size: 1.2rem;
+  border-radius: 4px;
+}
+
+.subCat li:hover {
+  background-color: #4052b6b0;
+}
+/* right side option */
+
+.moreOptions {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.otherOptions,
+.run {
+  cursor: pointer;
+  width: auto;
+}
+
+.otherOptions {
+  height: 2rem;
+}
+
+.run {
+  height: 1.7rem;
+}

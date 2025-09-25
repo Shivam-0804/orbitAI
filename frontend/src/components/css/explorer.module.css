@@ -1,0 +1,136 @@
+.main-tab-window {
+  padding: 1rem 1.5rem 1rem 1.5rem;
+}
+.main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 2rem;
+  position: sticky;
+}
+.main-header-text {
+  color: white;
+  font-size: 1.6rem;
+  font-weight: 300;
+}
+.main-header-icons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.main-header-icon {
+  color: white;
+  font-size: 1.6rem;
+  cursor: pointer;
+  border-radius: 0.1rem;
+}
+.main-header-icon:hover {
+  background-color: #334085;
+}
+
+/* folder */
+.folder-item {
+  display: flex;
+  flex-direction: column;
+}
+.folder-tab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+.folder-tab:hover {
+  outline: 1px solid #3f50b4;
+  background-color: #3f51b467;
+}
+.folder-tab-name {
+  font-size: 1.2rem;
+  color: white;
+  cursor: pointer;
+}
+.folder-tab-icons {
+  color: white;
+  cursor: pointer;
+  height: 1.6rem;
+  width: auto;
+}
+.folder-tab-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.subfolders {
+  margin-left: 1rem;
+}
+.folder-tab-options {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 1.2rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.folder-tab:hover .folder-tab-options {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.create {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.4rem;
+}
+.createInput {
+  border: none;
+  color: white;
+  background-color: transparent;
+  outline: none;
+  font-size: 1.1rem;
+}
+.create:focus-within {
+  outline: 1px solid #3f50b4;
+  background-color: #3f51b467;
+}
+
+.activeFile {
+  outline: 1px solid #3f50b4;
+  background-color: #3f51b467;
+}
+.activeClick{
+  outline: 1px solid #3f50b4;
+}
+.errorInput {
+  color: red;
+}
+
+
+
+.fileOptions{
+  min-width: 20rem;
+  padding: 0.7rem;
+  font-size: 1.2rem;
+}
+.fileOptions> *:not(:last-child){
+  margin-bottom: 3px;
+}
+.optionItem{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.optionItem:hover{
+  background-color: #3f50b4;
+}
+.line{
+  border: 0.5px solid #5d5d5dff;
+}
+.shortcut{
+  color: #ccc;
+}

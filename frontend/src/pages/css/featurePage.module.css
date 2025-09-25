@@ -1,0 +1,115 @@
+.container {
+  height: auto;
+  width: 100%;
+  padding: 3rem;
+  background: radial-gradient(circle at top left, #111428, black, black);
+  position: relative;
+}
+.heading {
+  display: block;
+  color: white;
+  font-weight: 600;
+  font-size: 3.6rem;
+  text-align: center;
+  margin: 0 auto 3rem auto;
+  position: relative;
+  width: fit-content;
+  padding-bottom: 1rem;
+  cursor: pointer;
+}
+
+/* .heading::after {
+  content: "";
+  display: block;
+  width: 300%;
+  height: 0.5px;
+  background: rgb(94, 94, 94);
+  background-image: linear-gradient(transparent, #3b82f6, #4f46e5, transparent);
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  border-radius: 2px;
+} */
+
+.cards_container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cards {
+  width: 60%;
+  height: 50%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-row: auto;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 3rem;
+  position: relative;
+}
+.card {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  padding: 1.5rem;
+  transition: transform 0.25s, box-shadow 0.25s;
+  padding: 1rem 2rem;
+  height: 30rem;
+  width: auto;
+  cursor: pointer;
+}
+
+.card:hover .card_icon,
+.card:hover .card_heading {
+  color: #5c6bc0;
+}
+
+.card:hover {
+  border: 1px solid rgb(92, 107, 192, 0.5);
+  transform: scale(1.05);
+}
+
+.tile {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.content {
+  position: absolute;
+  top: 25%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  pointer-events: none;
+}
+
+.card_icon {
+  height: 4rem;
+  width: auto;
+  margin-bottom: 0.75rem;
+  color: #ffffffcc;
+  transition: color 0.3s;
+}
+
+.card_heading {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.card_desc {
+  font-size: 1.3rem;
+  color: #cccccc;
+  line-height: 1.6;
+  width: 85%;
+}

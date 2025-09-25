@@ -1,0 +1,188 @@
+.root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.background {
+  border-radius: inherit;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  -webkit-mask-image: radial-gradient(
+    circle at 60% 5%,
+    black 0%,
+    black 15%,
+    transparent 60%
+  );
+  mask-image: radial-gradient(
+    circle at 60% 5%,
+    black 0%,
+    black 15%,
+    transparent 60%
+  );
+}
+
+.tiles {
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.tile {
+  position: absolute;
+  background-color: rgba(57, 72, 171, 0.5);
+  animation: tile 8s infinite;
+  opacity: 0;
+}
+
+.tile4,
+.tile6,
+.tile10 {
+  animation-delay: -2s;
+}
+.tile3,
+.tile5,
+.tile8 {
+  animation-delay: -4s;
+}
+.tile2,
+.tile9 {
+  animation-delay: -6s;
+}
+
+/* tile positions */
+.tile1 {
+  top: 0;
+  left: 0;
+  height: 10%;
+  width: 22.5%;
+}
+.tile2 {
+  top: 0;
+  left: 22.5%;
+  height: 10%;
+  width: 27.5%;
+}
+.tile3 {
+  top: 0;
+  left: 50%;
+  height: 10%;
+  width: 27.5%;
+}
+.tile4 {
+  top: 0;
+  left: 77.5%;
+  height: 10%;
+  width: 22.5%;
+}
+.tile5 {
+  top: 10%;
+  left: 0;
+  height: 22.5%;
+  width: 22.5%;
+}
+.tile6 {
+  top: 10%;
+  left: 22.5%;
+  height: 22.5%;
+  width: 27.5%;
+}
+.tile7 {
+  top: 10%;
+  left: 50%;
+  height: 22.5%;
+  width: 27.5%;
+}
+.tile8 {
+  top: 10%;
+  left: 77.5%;
+  height: 22.5%;
+  width: 22.5%;
+}
+.tile9 {
+  top: 32.5%;
+  left: 50%;
+  height: 22.5%;
+  width: 27.5%;
+}
+.tile10 {
+  top: 32.5%;
+  left: 77.5%;
+  height: 22.5%;
+  width: 22.5%;
+}
+
+@keyframes tile {
+  0%,
+  12.5%,
+  100% {
+    opacity: 1;
+  }
+  25%,
+  82.5% {
+    opacity: 0;
+  }
+}
+
+.line {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+
+.line::before,
+.line::after {
+  content: "";
+  position: absolute;
+  background-color:  #2a2b2c;
+  transition: transform 0.35s;
+}
+
+.line::before {
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+.line::after {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform-origin: 50% 0;
+  transform: scaleY(0);
+}
+
+.line1::before {
+  top: 10%;
+}
+.line1::after {
+  left: 22.5%;
+}
+.line2::before {
+  top: 32.5%;
+}
+.line2::after {
+  left: 50%;
+}
+.line3::before {
+  top: 55%;
+}
+.line3::after {
+  right: 22.5%;
+}
+
+.root:hover .tiles {
+  opacity: 1;
+}
+
+.root:hover .line {
+  opacity: 1;
+}
+.root:hover .line::before {
+  transform: scaleX(1);
+}
+.root:hover .line::after {
+  transform: scaleY(1);
+}

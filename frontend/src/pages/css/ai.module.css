@@ -1,0 +1,199 @@
+/* Container with dark gradient background */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 2rem;
+  /* background: radial-gradient(circle at bottom, #0c0c0f, #111428, #0c0c0f); */
+  background: radial-gradient(circle at bottom, #111428, black);
+  font-family: "Inter", sans-serif;
+}
+
+/* Card with moving border */
+.card {
+  display: flex;
+  align-items: center;
+  width: 90%;
+  height: 70%;
+  max-width: 120rem;
+  padding: 2rem;
+  background: transparent;
+  border-radius: 20px;
+  padding: 5rem;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid transparent;
+  z-index: 3;
+}
+.card::after {
+  content: "";
+  position: absolute;
+  border-radius: inherit;
+  height: 99.5%;
+  width: 99.9%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at bottom, #111428, black);
+  z-index: 2;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  transform: skew(-180deg);
+  width: 250%;
+  height: 150%;
+  background: linear-gradient(78.7deg, #3186ff 10%, #346bf1, #4fa0ff 90%);
+  box-shadow: 0 0 50rem #3b82f6, 0 0 50rem #3b82f6, 0 0 50rem #3b82f6;
+  animation: animateBorder 6s linear infinite;
+  transform-origin: left;
+  z-index: 0;
+}
+
+@keyframes animateBorder {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.card > * {
+  position: relative;
+  z-index: 100;
+}
+
+/* Left content */
+.left {
+  flex: 1;
+  text-align: center;
+  padding-right: 2rem;
+  color: #fff;
+}
+
+.aiTag {
+  display: inline-block;
+  padding: 1rem 0.9rem;
+  background: #2c2c34;
+  border-radius: 10px;
+  font-size: 1rem;
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-size: 3.2rem;
+  margin-bottom: 1rem;
+}
+
+.highlight {
+  color: #3b82f6;
+}
+
+.description {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  color: #c0c0c0;
+  margin-bottom: 2rem;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.cta {
+  text-decoration: none;
+  padding: 0.8rem 1.5rem;
+  background: #f59e0b;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #fff;
+  transition: 0.3s ease;
+}
+
+.cta:hover {
+  background: #d97706;
+}
+
+.right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.chat {
+  background: rgba(28, 28, 40, 0.6); /* transparent glass */
+  border-radius: 16px;
+  padding: 1rem;
+  max-width: 420px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px); /* frosted glass blur */
+}
+
+.userMessage {
+  background: rgba(44, 44, 52, 0.6);
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  color: #fff;
+  font-size: 1.2rem;
+  line-height: 1.4;
+  backdrop-filter: blur(8px);
+}
+
+.botMessage {
+  background: rgba(41, 41, 54, 0.6);
+  padding: 1rem;
+  border-radius: 12px;
+  color: #e5e5e5;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  backdrop-filter: blur(8px);
+}
+
+.codeBox {
+  background: rgba(17, 20, 40, 0.65);
+  border: 1px solid #3b82f6;
+  padding: 0.8rem;
+  border-radius: 8px;
+  margin: 0.8rem 0;
+  font-size:1rem;
+  color: #f0f0f0;
+  font-family: "Fira Code", "Consolas", monospace;
+  overflow-x: auto;
+  backdrop-filter: blur(6px);
+}
+
+.codeTitle {
+  font-weight: bold;
+  margin-bottom: 0.4rem;
+  color: #3b82f6;
+}
+
+.codeFile {
+  font-style: italic;
+  font-size: 1rem;
+  color: #c0c0c0;
+  margin-bottom: 0.6rem;
+  display: block;
+}
+
+.codeBox pre {
+  background: rgba(12, 15, 24, 0.6);
+  padding: 0.6rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 1rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  backdrop-filter: blur(4px);
+}
+
+

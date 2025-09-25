@@ -1,0 +1,21 @@
+.footer{
+    height: 2rem;
+    width: 100%;
+    background: linear-gradient(90deg, #4051b5, #00c6ff);
+}
+.options{
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+}
+.optionItems{
+    height: 1.7rem;
+    width: auto;
+    cursor: pointer;
+    padding: 0 5px;
+    transition: all 0.1s ease-in;
+}
+.optionItems:hover {
+  transform: scale(1.2);
+}
