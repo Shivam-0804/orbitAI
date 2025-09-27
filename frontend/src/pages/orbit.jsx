@@ -26,42 +26,42 @@ const initialFileSystem = [
     path: "/",
     status: "",
     children: [
-      // {
-      //   type: "file",
-      //   name: "README.md",
-      //   path: "/README.md",
-      //   content: "This is a project readme.",
-      //   status: "M", // 'M' indicates the file has been Modified
-      // },
-      // {
-      //   type: "folder",
-      //   name: "src",
-      //   path: "/src",
-      //   status: "", // A folder's status is implicitly based on its contents
-      //   children: [
-      //     {
-      //       type: "file",
-      //       name: "index.js",
-      //       path: "/src/index.js",
-      //       content: "console.log('hello world');",
-      //       status: "A", // 'A' indicates the file is new and has been Added (staged)
-      //     },
-      //   ],
-      // },
-      // {
-      //   type: "file",
-      //   name: "package.json",
-      //   path: "/package.json",
-      //   content: '{ "name": "my-app" }',
-      //   status: "", // An empty status means the file is tracked and unmodified
-      // },
-      // {
-      //   type: "file",
-      //   name: "config.js",
-      //   path: "/config.js",
-      //   content: "export default {};",
-      //   status: "?", // '?' indicates the file is Untracked
-      // },
+      {
+        type: "file",
+        name: "README.md",
+        path: "/README.md",
+        content: "This is a project readme.",
+        status: "M", // 'M' indicates the file has been Modified
+      },
+      {
+        type: "folder",
+        name: "src",
+        path: "/src",
+        status: "", // A folder's status is implicitly based on its contents
+        children: [
+          {
+            type: "file",
+            name: "index.js",
+            path: "/src/index.js",
+            content: "console.log('hello world');",
+            status: "A", // 'A' indicates the file is new and has been Added (staged)
+          },
+        ],
+      },
+      {
+        type: "file",
+        name: "package.json",
+        path: "/package.json",
+        content: '{ "name": "my-app" }',
+        status: "", // An empty status means the file is tracked and unmodified
+      },
+      {
+        type: "file",
+        name: "config.js",
+        path: "/config.js",
+        content: "export default {};",
+        status: "?", // '?' indicates the file is Untracked
+      },
     ],
   },
 ];

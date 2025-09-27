@@ -162,7 +162,11 @@ const FolderItem = ({
               error={error}
             />
           ) : (
-            <span className={styles["folder-tab-name"]}>{item.name}</span>
+            <span
+              className={`${styles["folder-tab-name"]} ${styles[item.status]}`}
+            >
+              {item.name}
+            </span>
           )}
         </div>
         <div className={styles["folder-tab-options"]}>
@@ -177,6 +181,15 @@ const FolderItem = ({
             title="New Folder"
           >
             <FolderPlus size={16} className={styles["folder-tab-icons"]} />
+          </div>
+          <div className={styles[item.status]}>
+            {item.status == "M"
+              ? "M"
+              : item.status == "A"
+                ? "A"
+                : item.status == "?"
+                  ? "U"
+                  : null}
           </div>
         </div>
       </div>
@@ -348,7 +361,7 @@ const FileItem = ({
       }}
     >
       {/* File Header */}
-      <div className={styles["folder-tab-header"]}>
+      <div className={`${styles["folder-tab-header"]}`}>
         <img src={iconSrc} alt="file" className={styles["folder-tab-icons"]} />
         {isRenamingThis ? (
           <InputField
@@ -358,10 +371,22 @@ const FileItem = ({
             error={error}
           />
         ) : (
-          <span className={styles["folder-tab-name"]}>{item.name}</span>
+          <span
+            className={`${styles["folder-tab-name"]} ${styles[item.status]}`}
+          >
+            {item.name}
+          </span>
         )}
       </div>
-
+      <div className={styles[item.status]}>
+        {item.status == "M"
+          ? "M"
+          : item.status == "A"
+            ? "A"
+            : item.status == "?"
+              ? "U"
+              : null}
+      </div>
       {/* Right-Click Menu */}
       {menu.visible && (
         <div
