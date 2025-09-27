@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-case-declarations */
 import { Resizable } from "re-resizable";
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -30,7 +31,7 @@ const http = {
   },
 };
 
-// ---- Setup LightningFS ---
+// ---Setup LightningFS -----
 const lfs = new LightningFS("orbitGitFS", { wipe: true });
 const pfs = lfs.promises;
 // git.plugins.set("fs", lfs);
@@ -108,7 +109,7 @@ export default function TerminalWindow({
                 }
             }
         } catch (error) {
-            console.error("Error reading LFS directory:", error);
+            // This can happen if the directory doesn't exist yet, which is fine
         }
         return paths;
     };
@@ -193,6 +194,10 @@ export default function TerminalWindow({
   }, [terminals, activeTerminalId, printPrompt]);
 
   useEffect(() => {
+    activeTerminalIdRef.current = activeTerminalId;
+  }, [activeTerminalId]);
+
+  useEffect(() => {
     if (!activeTerminalId || !xtermInstances.current[activeTerminalId]) return;
     const { term } = xtermInstances.current[activeTerminalId];
     if (term.isDisposed) return;
@@ -217,13 +222,13 @@ export default function TerminalWindow({
       let currentInput = inputBuffers.current[activeTerminalId] || "";
 
       if (isAnyExecuting()) {
-        if (data === '\r') { // Enter
+        if (data === '\r') {
           safeWriteln(term);
           if (isWSExecuting) sendWSInput(currentInput + "\n");
-          else if (pyodide.isExecuting) pyodide.sendInput(currentInput);
-          else if (cppCompiler.isExecuting) cppCompiler.sendInput(currentInput);
+          else if (pyodide.isExecuting) pyodide.sendInput(currentInput + "\n");
+          else if (cppCompiler.isExecuting) cppCompiler.sendInput(currentInput + "\n");
           inputBuffers.current[activeTerminalId] = "";
-        } else if (data === '\x7F') { // Backspace
+        } else if (data === '\x7F') {
           if (currentInput.length > 0) {
             inputBuffers.current[activeTerminalId] = currentInput.slice(0, -1);
             term.write('\b \b');
@@ -233,9 +238,9 @@ export default function TerminalWindow({
           safeWrite(term, data);
         }
       } else {
-        if (data === '\r') { // Enter
+        if (data === '\r') {
           await handleCommand(currentCommand);
-        } else if (data === '\x7F') { // Backspace
+        } else if (data === '\x7F') {
           if (currentCommand.length > 0) {
             commandBuffers.current[activeTerminalId] = currentCommand.slice(0, -1);
             term.write('\b \b');
@@ -248,28 +253,82 @@ export default function TerminalWindow({
     });
 
     const handleCommand = async (cmd) => {
-      const [base, ...args] = cmd.trim().split(" ");
+      const [base, ...args] = cmd.trim().split(/\s+/);
       if (!base) return printPrompt(activeTerminalId);
       safeWriteln(term);
       const printAndReset = () => printPrompt(activeTerminalId);
       const currentCwd = terminals.find((t) => t.id === activeTerminalId)?.cwd || "/";
       const targetPath = (arg) => normalizePath(arg.startsWith("/") ? arg : `${currentCwd}/${arg}`);
 
+      const readLfsToStateNode = async (dirPath) => {
+        const name = dirPath.split('/').pop() || '/';
+        const stats = await pfs.stat(dirPath);
+        if (stats.isDirectory()) {
+            const children = await pfs.readdir(dirPath);
+            const childNodes = await Promise.all(
+                children
+                    .filter(child => child !== '.git')
+                    .map(child => readLfsToStateNode(normalizePath(`${dirPath}/${child}`)))
+            );
+            return { type: 'folder', name, path: dirPath, children: childNodes, status: '' };
+        } else {
+            const content = await pfs.readFile(dirPath, 'utf8');
+            return { type: 'file', name, path: dirPath, content, status: '' };
+        }
+      };
+      
+      const updateFileSystemGitStatus = async (dir) => {
+          const statusMap = {};
+          try {
+              await pfs.stat(`${dir}/.git`);
+              const matrix = await git.statusMatrix({ fs: lfs, dir });
+              for (const [filepath, head, workdir, stage] of matrix) {
+                  const path = normalizePath(`${dir}/${filepath}`);
+                  if (stage === 2 && workdir === 2) statusMap[path] = 'A'; // Added (Staged)
+                  else if (stage === 1 && workdir === 2) statusMap[path] = 'M'; // Modified
+                  else if (stage === 0 && workdir === 2) statusMap[path] = '?'; // Untracked
+              }
+          } catch (e) { /* Not a git repo, do nothing */ }
+          
+          const applyStatuses = (nodes) => {
+              return nodes.map(node => {
+                  const newNode = { ...node, status: statusMap[node.path] || "" };
+                  if (node.children) {
+                      newNode.children = applyStatuses(node.children);
+                  }
+                  return newNode;
+              });
+          };
+
+          setFileSystem(currentFileSystem => applyStatuses(currentFileSystem));
+      };
+
       if (["python", "cpp", "run"].includes(base)) {
-          if (!args[0]) { safeWriteln(term, `Usage: ${base} <filename>`); return printAndReset(); }
-          const path = targetPath(args[0]);
-          const callbacks = { stdout: (d) => safeWrite(term, d), stderr: (d) => safeWrite(term, colorText(d, "red")), onExit: printAndReset };
-          if (base === "python") pyodide.runPython(path, callbacks);
-          else if (base === "cpp") cppCompiler.runCpp(path, callbacks);
-          else if (base === "run") runWSFile(path, callbacks);
-          return;
+        if (!args[0]) { safeWriteln(term, `Usage: ${base} <filename>`); return printAndReset(); }
+        const path = targetPath(args[0]);
+        const callbacks = {
+          stdout: (data) => safeWrite(term, data),
+          stderr: (data) => safeWrite(term, colorText(data, "red")),
+          onExit: printAndReset,
+        };
+        if (base === "python") pyodide.runPython(path, callbacks);
+        else if (base === "cpp") cppCompiler.runCpp(path, callbacks);
+        else if (base === "run") runWSFile(path, callbacks);
+        return;
       }
 
       if (base === "pip") {
-          if (args[0] === "install" && args[1]) {
-            pyodide.installPackage(args[1], { stdout: (d) => safeWrite(term, d), stderr: (d) => safeWrite(term, colorText(d, "red")), onExit: printAndReset });
-          } else { safeWriteln(term, "Usage: pip install <package_name>"); printAndReset(); }
-          return;
+        if (args[0] === "install" && args[1]) {
+          pyodide.installPackage(args[1], {
+            stdout: (data) => safeWrite(term, data),
+            stderr: (data) => safeWrite(term, colorText(data, "red")),
+            onExit: printAndReset,
+          });
+        } else {
+          safeWriteln(term, "Usage: pip install <package_name>");
+          printAndReset();
+        }
+        return;
       }
 
       const localCommands = {
@@ -288,13 +347,13 @@ export default function TerminalWindow({
           if (!args[0]) return;
           const newFolderPath = targetPath(args[0]);
           await pfs.mkdir(newFolderPath);
-          setFileSystem((fs) => addNodeByPath(fs, currentCwd, { type: "folder", name: args[0], path: newFolderPath, children: [] }));
+          setFileSystem((fs) => addNodeByPath(fs, currentCwd, { type: "folder", name: args[0], path: newFolderPath, children: [], status: "" }));
         },
         touch: async () => {
           if (!args[0]) return;
           const newFilePath = targetPath(args[0]);
           await pfs.writeFile(newFilePath, '', 'utf8');
-          setFileSystem((fs) => addNodeByPath(fs, currentCwd, { type: "file", name: args[0], path: newFilePath, content: "" }));
+          setFileSystem((fs) => addNodeByPath(fs, currentCwd, { type: "file", name: args[0], path: newFilePath, content: "", status: "" }));
         },
         rm: async () => {
           if (!args[0]) return;
@@ -338,18 +397,18 @@ export default function TerminalWindow({
                   const dir = `/${args[2] || args[1].split('/').pop().replace('.git','')}`;
                   safeWriteln(term, `Cloning into '${dir}'...`);
                   await git.clone({ fs: lfs, http, dir, url: args[1], onAuth });
-                  safeWriteln(term, colorText("Clone complete.", "green"));
+                  safeWriteln(term, colorText("Clone complete. Syncing file system...", "green"));
+                  const newNode = await readLfsToStateNode(dir);
+                  setFileSystem(fs => addNodeByPath(fs, '/', newNode));
                   break;
                 case "init": await git.init({ fs: lfs, dir: currentCwd }); safeWriteln(term, `Initialized empty Git repository in ${currentCwd}/.git/`); break;
                 case "status": {
                   const statusResult = await git.statusMatrix({ fs: lfs, dir: currentCwd });
                   const staged = [], modified = [], untracked = [];
                   for (const [filepath, head, workdir, stage] of statusResult) {
-                    if (workdir === 2 && stage === 0) untracked.push(filepath);
-                    if (head > 0 && workdir === 2 && stage === 1) modified.push({ file: filepath, type: 'modified' });
-                    if (head > 0 && workdir === 0 && stage === 1) modified.push({ file: filepath, type: 'deleted' });
-                    if (stage === 2) staged.push({ file: filepath, type: (head === 0 ? 'new' : 'modified')});
-                    if (stage === 0 && head > 0 && workdir > 0) staged.push({ file: filepath, type: 'deleted' });
+                    if (stage === 2 && workdir === 2) staged.push({ file: filepath, type: 'new' });
+                    else if (stage === 1 && workdir === 2) modified.push({ file: filepath, type: 'modified' });
+                    else if (stage === 0 && workdir === 2) untracked.push(filepath);
                   }
                   if (!staged.length && !modified.length && !untracked.length) {
                       const branch = await git.currentBranch({ fs: lfs, dir: currentCwd, fullname: false });
@@ -456,7 +515,18 @@ export default function TerminalWindow({
                 case "pull":
                   safeWriteln(term, `Pulling from remote...`);
                   await git.pull({ fs: lfs, http, dir: currentCwd, author: { name: "OrbitAI", email: "orbit@ide.com" }, onAuth });
-                  safeWriteln(term, colorText("Pull complete.", "green"));
+                  safeWriteln(term, colorText("Pull complete. Syncing file system...", "green"));
+                  const pulledNode = await readLfsToStateNode(currentCwd);
+                  setFileSystem(currentFs => {
+                      const parentPath = currentCwd.substring(0, currentCwd.lastIndexOf('/')) || '/';
+                      const parentNode = findNodeByPath(currentFs, parentPath);
+                      if (parentNode && parentNode.children) {
+                          const newChildren = parentNode.children.filter(c => c.path !== currentCwd);
+                          newChildren.push(pulledNode);
+                          parentNode.children = newChildren;
+                      }
+                      return [...currentFs];
+                  });
                   break;
                 case "push": {
                   const u_flag_index = args.findIndex(a => a === '-u' || a === '--set-upstream');
@@ -480,6 +550,9 @@ export default function TerminalWindow({
                   safeWriteln(term, colorText(`git: '${gitCmd}' is not a git command.`, "red"));
                   break;
             }
+            if (isRepo || gitCmd === 'init' || gitCmd === 'clone') {
+                await updateFileSystemGitStatus(currentCwd);
+            }
           } catch (err) { safeWriteln(term, colorText(err.message, "red")); }
         },
       };
@@ -488,7 +561,7 @@ export default function TerminalWindow({
       else if (!localCommands[base]) safeWriteln(term, colorText(`Command not found: ${base}`, "red"));
       printPrompt(activeTerminalId);
     };
-
+    
     return () => onDataDisposable.dispose();
   }, [ activeTerminalId, terminals, fileSystem, pyodide, cppCompiler, runWSFile, sendWSInput, isAnyExecuting, killWS, printPrompt, setFileSystem, credentials, isWSExecuting ]);
 
