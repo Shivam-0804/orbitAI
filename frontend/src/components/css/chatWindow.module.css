@@ -1,0 +1,719 @@
+:root {
+  --chat-bg: rgba(20, 20, 20, 0.7);
+  --chat-header-bg: rgba(15, 15, 15, 0.6);
+  --chat-text: #e0e0e0;
+  --chat-border: rgba(255, 255, 255, 0.08);
+  --chat-input-bg: rgba(30, 30, 30, 0.6);
+  --chat-accent: #a878ff;
+  --chat-accent-hover: #c090ff;
+  --user-bubble-bg: #4a4a4a;
+  --ai-bubble-bg: rgba(30, 30, 30, 0.8);
+  --error-bubble-bg: #4a2525;
+  --error-bubble-border: #ff5555;
+  --error-bubble-text: #ffc4c4;
+  --welcome-text: #888;
+  --code-bg: rgba(10, 10, 10, 0.9);
+}
+
+.aiChatContainer {
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  background-color: var(--chat-bg);
+  border: 1px solid var(--chat-border);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  transition: transform 0.1s ease-out;
+}
+
+.apiKeyLink {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #aaa;
+  text-decoration: none;
+  transition: color 0.2s;
+  text-transform: capitalize;
+}
+
+.apiKeyLink:hover {
+  color: var(--chat-accent);
+  text-decoration: underline;
+}
+
+.codeBlockHeader {
+  background-color: var(--user-bubble-bg);
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  color: #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.copyButton {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.copyButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.copyMessageButton {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
+  opacity: 0; /* Hidden by default */
+}
+
+.chatMessageWrapper:hover .copyMessageButton {
+  opacity: 1; /* Show on hover */
+}
+
+.copyMessageButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.chatWindowWrapper {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Open Sans",
+    "Helvetica Neue",
+    sans-serif;
+  box-sizing: border-box;
+}
+
+.chatWindowWrapper *,
+.chatWindowWrapper *::before,
+.chatWindowWrapper *::after {
+  box-sizing: border-box;
+}
+
+.aiChatContainer {
+  position: fixed;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--chat-text);
+}
+
+.aiChatContainer.pinned {
+  z-index: 99999;
+}
+.aiChatContainer.minimized {
+  opacity: 0;
+  transform: scale(0.8) translateY(200px);
+  pointer-events: none;
+}
+
+.restoreButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--chat-accent);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+  z-index: 10000;
+  opacity: 0;
+  transform: scale(0);
+}
+.restoreButton.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+.restoreButton:hover {
+  background-color: var(--chat-accent-hover);
+  transform: scale(1.1);
+}
+
+.chatHeader {
+  background-color: var(--chat-header-bg);
+  padding: 8px 12px;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--chat-border);
+  flex-shrink: 0;
+}
+.chatHeader:active {
+  cursor: grabbing;
+}
+
+.chatHeaderTitle {
+  font-weight: 600;
+  font-size: 1rem;
+}
+.headerControls {
+  display: flex;
+  gap: 8px;
+}
+
+.controlButton {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+.controlButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.controlButton.active {
+  color: var(--chat-accent);
+}
+
+.chatBody {
+  flex-grow: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chatMessageWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chatMessageWrapper.user {
+  justify-content: flex-end;
+}
+
+.chatMessageWrapper.assistant {
+  justify-content: flex-start;
+}
+
+.chatMessageWrapper.user .copyMessageButton {
+  order: -1;
+}
+
+.chatBodyWelcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: var(--welcome-text);
+}
+.welcomeLogo {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+.welcomeTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #999;
+}
+.welcomeSubtitle {
+  font-size: 0.9rem;
+}
+
+.chatBody::-webkit-scrollbar {
+  width: 6px;
+}
+.chatBody::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chatBody::-webkit-scrollbar-thumb {
+  background-color: var(--chat-border);
+  border-radius: 10px;
+}
+
+.chatMessage {
+  max-width: 100%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  line-height: 1.5;
+  font-size: 0.95rem;
+  word-wrap: break-word;
+  background-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  user-select: text; /* Allow text selection */
+  -webkit-user-select: text;
+  -moz-user-select: text;
+}
+.chatMessageWrapper.user .chatMessage {
+  background-color: var(--user-bubble-bg);
+  border-bottom-right-radius: 4px;
+  color: white;
+}
+.chatMessageWrapper.assistant .chatMessage {
+  background-color: var(--ai-bubble-bg);
+  border-bottom-left-radius: 4px;
+  padding: 0;
+  overflow: hidden;
+}
+.aiMessageContent {
+  padding: 10px 14px;
+}
+.chatMessage.attachment-info {
+  background-color: transparent;
+  border: 1px solid var(--chat-border);
+  color: #ccc;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+.chatMessage.error {
+  background-color: var(--error-bubble-bg);
+  border: 1px solid var(--error-bubble-border);
+  color: var(--error-bubble-text);
+  border-bottom-left-radius: 4px;
+}
+
+.codeBlock {
+  background-color: var(--code-bg);
+  font-family: "Fira Code", monospace;
+  font-size: 0.9rem;
+  margin: 10px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.4);
+}
+.codeBlock pre {
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+}
+.codeBlock code {
+  white-space: pre-wrap;
+}
+
+.typingIndicator {
+  align-self: flex-start;
+  display: flex;
+  gap: 4px;
+  padding: 10px 14px;
+  background-color: var(--ai-bubble-bg);
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+}
+.typingIndicator span {
+  width: 8px;
+  height: 8px;
+  background-color: #888;
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+.typingIndicator span:nth-of-type(1) {
+  animation-delay: -0.32s;
+}
+.typingIndicator span:nth-of-type(2) {
+  animation-delay: -0.16s;
+}
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+.chatFooter {
+  padding: 12px;
+  border-top: 1px solid var(--chat-border);
+  flex-shrink: 0;
+  background-color: var(--chat-header-bg);
+}
+.chatInputForm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chatInput {
+  flex-grow: 1;
+  background-color: var(--chat-input-bg);
+  border: 1px solid var(--chat-border);
+  color: var(--chat-text);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 1rem;
+  resize: none;
+  transition: border-color 0.2s ease;
+}
+.chatInput:focus {
+  outline: none;
+  border-color: var(--chat-accent);
+}
+
+.sendButton {
+  background-color: var(--chat-accent);
+  border: none;
+  color: white;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+.sendButton:hover {
+  background-color: var(--chat-accent-hover);
+}
+.sendButton:disabled {
+  background-color: var(--user-bubble-bg);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stagedFilesContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 0 10px;
+}
+.stagedFile {
+  background-color: var(--chat-input-bg);
+  border: 1px solid var(--chat-border);
+  border-radius: 15px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.removeStagedFile {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  font-size: 1.2rem;
+}
+.removeStagedFile:hover {
+  color: white;
+}
+
+.resizeHandle {
+  position: absolute;
+  z-index: 10;
+}
+.resizeHandle.top,
+.resizeHandle.bottom {
+  height: 10px;
+  left: 10px;
+  right: 10px;
+  cursor: ns-resize;
+}
+.resizeHandle.top {
+  top: -5px;
+}
+.resizeHandle.bottom {
+  bottom: -5px;
+}
+.resizeHandle.left,
+.resizeHandle.right {
+  width: 10px;
+  top: 10px;
+  bottom: 10px;
+  cursor: ew-resize;
+}
+.resizeHandle.left {
+  left: -5px;
+}
+.resizeHandle.right {
+  right: -5px;
+}
+.resizeHandle.topLeft {
+  width: 15px;
+  height: 15px;
+  top: -7px;
+  left: -7px;
+  cursor: nwse-resize;
+}
+.resizeHandle.topRight {
+  width: 15px;
+  height: 15px;
+  top: -7px;
+  right: -7px;
+  cursor: nesw-resize;
+}
+.resizeHandle.bottomLeft {
+  width: 15px;
+  height: 15px;
+  bottom: -7px;
+  left: -7px;
+  cursor: nesw-resize;
+}
+.resizeHandle.bottomRight {
+  width: 15px;
+  height: 15px;
+  bottom: -7px;
+  right: -7px;
+  cursor: nwse-resize;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+}
+.modalContainer {
+  background-color: var(--chat-bg);
+  border: 1px solid var(--chat-border);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 550px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+.modalHeader {
+  padding: 16px;
+  border-bottom: 1px solid var(--chat-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--chat-text);
+  flex-shrink: 0;
+}
+.modalTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.modalCloseBtn {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+.modalBody {
+  padding: 20px;
+}
+.modalFooter {
+  padding: 12px 16px;
+  border-top: 1px solid var(--chat-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.modalFooter button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+.btnSecondary {
+  background-color: var(--chat-border);
+  color: white;
+}
+.btnSecondary:hover {
+  background-color: #555;
+}
+.btnPrimary {
+  background-color: var(--chat-accent);
+  color: white;
+}
+.btnPrimary:hover {
+  background-color: var(--chat-accent-hover);
+}
+.btnPrimary:disabled {
+  background-color: var(--chat-border);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.filePickerModal {
+  max-height: 75vh;
+}
+.filePickerUploadArea {
+  padding: 16px;
+  border-bottom: 1px solid var(--chat-border);
+  flex-shrink: 0;
+}
+.uploadButton {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--chat-input-bg);
+  border: 2px dashed var(--chat-border);
+  color: #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 500;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+.uploadButton:hover {
+  background-color: #383838;
+  border-color: var(--chat-accent);
+}
+.filePickerBody {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+.filePickerList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.filePickerItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: var(--chat-text);
+  font-size: 0.95rem;
+}
+.filePickerItem:hover {
+  background-color: var(--chat-input-bg);
+}
+.filePickerItemIcon {
+  color: #ccc;
+  flex-shrink: 0;
+}
+.filePickerPath {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settingsFormGroup {
+  margin-bottom: 20px;
+}
+.settingsLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+.settingsSelect,
+.settingsInput {
+  width: 100%;
+  background-color: var(--chat-input-bg);
+  border: 1px solid var(--chat-border);
+  color: var(--chat-text);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 1rem;
+}
+.settingsSelect:focus,
+.settingsInput:focus {
+  outline: none;
+  border-color: var(--chat-accent);
+}
+
+.customCheckbox {
+  display: block;
+  position: relative;
+  padding-left: 28px;
+  cursor: pointer;
+  user-select: none;
+}
+.customCheckbox input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+.checkmark {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: var(--chat-input-bg);
+  border: 1px solid var(--chat-border);
+  border-radius: 4px;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+.customCheckbox:hover input ~ .checkmark {
+  border-color: var(--chat-accent);
+}
+.customCheckbox input:checked ~ .checkmark {
+  background-color: var(--chat-accent);
+  border-color: var(--chat-accent);
+}
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+.customCheckbox input:checked ~ .checkmark:after {
+  display: block;
+}

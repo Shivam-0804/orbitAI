@@ -1,3 +1,4 @@
+/* --- Base Styles --- */
 .parent {
   height: 100vh;
   width: 100%;
@@ -11,28 +12,26 @@
   overflow: hidden;
 }
 
-/* main container */
+/* --- Main Container --- */
 .container {
-  max-width: 90rem;
+  max-width: 100rem;
   width: 90%;
-  min-height: 55rem;
+  min-height: 60rem;
   display: flex;
   border-radius: 1.5rem;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(20, 20, 20, 0.7);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-  position: relative;
-  z-index: 1;
+  border: 0.0625rem solid rgba(255, 255, 255, 0.1);
+  background: rgba(25, 28, 36, 0.7);
+  backdrop-filter: blur(0.75rem);
+  box-shadow: 0 1.25rem 3.75rem rgba(0, 0, 0, 0.6);
 }
 
-/* left image side */
+/* --- Left Image Side --- */
 .img_container {
   position: relative;
   flex: 1;
   min-width: 45%;
-  background-color: #111;
+  background-color: #111318;
 }
 
 .img_style {
@@ -40,132 +39,133 @@
   width: 100%;
   object-fit: cover;
   position: absolute;
-  top: 0;
-  left: 0;
   opacity: 0;
   transition: opacity 1s ease-in-out;
-  filter: brightness(0.7) contrast(1.1);
+  filter: brightness(0.8);
 }
 
 .img_active {
   opacity: 1;
 }
 
-/* dots */
+/* --- Dots --- */
 .dots {
   position: absolute;
-  bottom: 30px;
+  bottom: 1.875rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 15px;
-  z-index: 100;
+  gap: 0.9375rem;
 }
 
 .dot {
-  height: 10px;
-  width: 10px;
+  height: 0.625rem;
+  width: 0.625rem;
   border-radius: 50%;
-  background: rgba(200, 200, 200, 0.4);
+  background: rgba(200, 200, 200, 0.3);
   cursor: pointer;
-  transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
 }
 
 .dot:hover {
-  transform: scale(1.2);
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .dot_active {
-  background: #4f6ef7;
-  transform: scale(1.3);
-  box-shadow: 0 0 12px #4f6ef7, 0 0 25px rgba(79, 110, 247, 0.6);
+  background: #5a67d8;
+  transform: scale(1.2);
+  box-shadow: 0 0 0.75rem #5a67d8;
 }
 
-/* back button */
+/* --- Back Button --- */
 .back_button {
-  z-index: 100;
   position: absolute;
-  top: 15px;
-  left: 15px;
-  padding: 12px;
-  background-color: rgba(30, 30, 30, 0.7);
+  top: 1.25rem;
+  left: 1.25rem;
+  padding: 0.75rem;
+  background-color: rgba(25, 28, 36, 0.7);
   border-radius: 50%;
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(0.5rem);
+  transition: all 0.3s ease;
 }
 
 .back_button:hover {
-  background-color: rgba(50, 50, 50, 0.9);
-  transform: translateY(-2px);
+  background-color: rgba(40, 44, 58, 0.9);
+  transform: scale(1.05);
 }
 
 .back_arrow {
-  color: #4f6ef7;
-  height: 24px;
-  width: 24px;
-  cursor: pointer;
+  color: #ffff;
+  height: 1.5rem;
+  width: 1.5rem;
 }
 
-/* right content */
+/* --- Right Content --- */
 .content_container {
-  padding: 4rem 3.5rem;
+  padding: 2.5rem 3.5rem;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   position: relative;
-  background-color: rgba(15, 15, 15, 0.6);
-  color: #e0e0e0;
+  background-color: #1c1f2a;
 }
 
 .login_header {
   margin-bottom: 2.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  padding-bottom: 1.5rem;
+  display: flex;
+  gap: 2.5rem;
+  position: relative;
 }
+
 .login_header_text {
-  color: #aaa;
-  font-size: 1.9rem;
+  color: #8f9ba8;
+  font-size: 1.4rem;
   font-weight: 500;
-  margin-bottom: 0.8rem;
   cursor: pointer;
   transition: color 0.3s ease;
+  padding-bottom: 0.75rem;
+  position: relative;
 }
 
 .login_header_text:hover {
-  color: #fff;
+  color: #ffffff;
 }
 
 .selected_option {
-  font-size: 2.8rem;
-  font-weight: 700;
-  color: #4f6ef7;
-  margin-top: 0;
-  letter-spacing: -0.5px;
+  color: #ffffff;
+  font-weight: 600;
 }
 
-/* footer */
-.footer {
-  color: #aaa;
-  font-size: 1.5rem;
+.selected_option::after {
+  content: "";
   position: absolute;
-  bottom: 4rem;
+  bottom: -0.0625rem;
+  left: 0;
+  width: 100%;
+  height: 0.1875rem;
+  background-color: #5a67d8;
+  border-radius: 0.125rem;
+}
+
+/* --- Footer --- */
+.footer {
+  color: #8f9ba8;
+  font-size: 1.2rem;
+  position: absolute;
+  bottom: 2.5rem;
   width: calc(100% - 7rem);
   text-align: center;
 }
 
 .guest_login {
-  color: #4f6ef7;
+  color: #5a67d8;
   font-weight: 600;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .guest_login:hover {
-  color: #6d86ff;
+  color: #818cf8;
   text-decoration: underline;
 }

@@ -28,13 +28,12 @@ export default function Access() {
             <img
               key={index}
               src={src}
-              alt=""
+              alt="Decorative background"
               className={`${styles.img_style} ${
                 index === currentIndex ? styles.img_active : ""
               }`}
             />
           ))}
-          {/* Dots */}
           <div className={styles.dots}>
             {images.map((_, index) => (
               <div
@@ -46,11 +45,12 @@ export default function Access() {
               />
             ))}
           </div>
-          {/*back button*/}
           <Link to="/" className={styles.back_button}>
             <MoveLeft className={styles.back_arrow} />
           </Link>
         </div>
+
+        {/* Form Content */}
         <div className={styles.content_container}>
           <div className={styles.login_header}>
             <span
@@ -62,11 +62,6 @@ export default function Access() {
               Login
             </span>
             <span
-              className={`${styles.login_header_text} ${styles.selected_option}`}
-            >
-              /
-            </span>
-            <span
               className={`${styles.login_header_text} ${
                 option === "signup" ? styles.selected_option : ""
               }`}
@@ -75,11 +70,13 @@ export default function Access() {
               Sign Up
             </span>
           </div>
+
           {option === "login" ? <Login /> : <Signup />}
+
           <div className={styles.footer}>
             or continue as{" "}
             <Link to="/orbit" className={styles.guest_login}>
-              guest
+              Guest
             </Link>
           </div>
         </div>

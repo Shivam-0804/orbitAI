@@ -1,10 +1,10 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 
 export default function useServerCompiler(fileSystem, cwd, onOutput, onExecutionEnd) {
   const wsRef = useRef(null);
   const [isExecuting, setIsExecuting] = useState(false);
 
-  const colorText = (text, color) => {
+  const colorText = useCallback((text, color) => {
     const colors = {
       red: "\x1b[31m",
       green: "\x1b[32m",
@@ -16,34 +16,27 @@ export default function useServerCompiler(fileSystem, cwd, onOutput, onExecution
       reset: "\x1b[0m",
     };
     return `${colors[color] || ""}${text}${colors.reset}`;
-  };
+  }, []);
 
-  const runFile = (entryPath) => {
+  const runWSFile = useCallback((entryPath) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
       wsRef.current = new WebSocket("ws://localhost:3001");
 
       wsRef.current.onopen = () => {
         setIsExecuting(true);
-        wsRef.current.send(
-          JSON.stringify({ type: "execute", entryPath, fileSystem })
-        );
+        wsRef.current.send(JSON.stringify({ type: "execute", entryPath, fileSystem }));
       };
 
       wsRef.current.onmessage = (event) => {
         const message = JSON.parse(event.data);
         switch (message.type) {
-          case "stdout":
-            onOutput(message.data);
-            break;
-          case "stderr":
-            onOutput(colorText(message.data, "red"));
-            break;
+          case "stdout": onOutput(message.data); break;
+          case "stderr": onOutput(colorText(message.data, "red")); break;
           case "exit":
             setIsExecuting(false);
             onExecutionEnd();
             break;
-          default:
-            console.warn("Unknown message:", message);
+          default: console.warn("Unknown message:", message);
         }
       };
 
@@ -55,17 +48,43 @@ export default function useServerCompiler(fileSystem, cwd, onOutput, onExecution
       wsRef.current.onclose = () => setIsExecuting(false);
     } else {
       setIsExecuting(true);
-      wsRef.current.send(
-        JSON.stringify({ type: "execute", entryPath, fileSystem })
-      );
+      wsRef.current.send(JSON.stringify({ type: "execute", entryPath, fileSystem }));
     }
-  };
+  }, [fileSystem, onOutput, onExecutionEnd, colorText]);
 
-  const sendInput = (data) => {
+  const runHTTPFile = useCallback(async (entryPath) => {
+    try {
+      setIsExecuting(true);
+      const res = await fetch("http://localhost:3001/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entryPath, fileSystem }),
+      });
+      const result = await res.json();
+      if (result.success) onOutput(result.output);
+      else onOutput(colorText(result.error || "Execution failed", "red"));
+    } catch (err) {
+      onOutput(colorText(`Request failed: ${err.message}`, "red"));
+    } finally {
+      setIsExecuting(false);
+      onExecutionEnd();
+    }
+  }, [fileSystem, onOutput, onExecutionEnd, colorText]);
+
+  const sendInput = useCallback((data) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type: "stdin", data }));
     }
-  };
+  }, []);
 
-  return { runFile, sendInput, isExecuting };
+  const killWS = useCallback(() => {
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+      setIsExecuting(false);
+    }
+  }, []);
+
+  // For compatibility: alias runFile to runWSFile
+  return { runFile: runWSFile, runWSFile, runHTTPFile, sendInput, isExecuting, killWS };
 }

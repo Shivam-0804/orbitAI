@@ -70,6 +70,30 @@ export default function TerminalWindow({
   const activeTerminalCwd =
     terminals.find((t) => t.id === activeTerminalId)?.cwd || "/";
 
+  const printPrompt = useCallback(
+    (terminalId) => {
+      const termState = terminals.find((t) => t.id === terminalId);
+      const termInstance = xtermInstances.current[terminalId]?.term;
+      if (!termState || !termInstance || termInstance.isDisposed) return;
+      commandBuffers.current[terminalId] = "";
+      inputBuffers.current[terminalId] = "";
+      const user = colorText("orbit", "green");
+      const sep = colorText(` ${termState.cwd}`, "magenta");
+      const dollar = colorText(" $ ", "white");
+      safeWrite(termInstance, `\r\n${user}${sep}${dollar}`);
+    },
+    [terminals]
+  );
+
+  const onOutputCallback = useCallback((data) => {
+    const term = xtermInstances.current[activeTerminalIdRef.current]?.term;
+    if (term) safeWrite(term, data);
+  }, []);
+
+  const onExecutionEndCallback = useCallback(() => {
+    printPrompt(activeTerminalIdRef.current);
+  }, [printPrompt]);
+
   const {
     runFile: runWSFile,
     sendInput: sendWSInput,
@@ -78,11 +102,8 @@ export default function TerminalWindow({
   } = useServerCompiler(
     fileSystem,
     activeTerminalCwd,
-    (data) => {
-      const term = xtermInstances.current[activeTerminalIdRef.current]?.term;
-      if (term) safeWrite(term, data);
-    },
-    () => printPrompt(activeTerminalIdRef.current),
+    onOutputCallback,
+    onExecutionEndCallback,
     Array.from(installedPackages)
   );
 
@@ -122,32 +143,54 @@ export default function TerminalWindow({
   const updateFileSystemGitStatus = useCallback(
     async (dir) => {
       const statusMap = {};
+      let isRepo = false;
       try {
+        // Check if .git exists to determine if we should even run statusMatrix
         await pfs.stat(`${dir}/.git`);
+        isRepo = true;
         const matrix = await git.statusMatrix({ fs: lfs, dir });
         for (const [filepath, head, workdir, stage] of matrix) {
+          // Use a simpler status mapping for clarity
           const path = normalizePath(`${dir}/${filepath}`);
-          if (stage === 2 && workdir === 2)
-            statusMap[path] = "A"; // Added (Staged)
-          else if (stage === 1 && workdir === 2)
+          if (head === 0 && workdir === 2 && stage === 2)
+            statusMap[path] = "A"; // Added
+          else if (head > 0 && workdir === 2 && stage === 2)
+            statusMap[path] = "M"; // Staged Modified
+          else if (head > 0 && workdir === 2 && stage === 1)
             statusMap[path] = "M"; // Modified
-          else if (stage === 0 && workdir === 2) statusMap[path] = "?"; // Untracked
+          else if (head === 0 && workdir === 2 && stage === 0)
+            statusMap[path] = "?"; // Untracked
+          else if (head > 0 && workdir === 0) statusMap[path] = "D"; // Deleted
         }
       } catch (e) {
-        /* Not a git repo, all statuses will be cleared */
+        /* Not a git repo, or another error occurred */
       }
 
-      const applyStatuses = (nodes) => {
-        return nodes.map((node) => {
-          const newNode = { ...node, status: statusMap[node.path] || "" };
-          if (node.children) {
-            newNode.children = applyStatuses(node.children);
-          }
-          return newNode;
-        });
-      };
+      setFileSystem((currentFileSystem) => {
+        let needsUpdate = false;
 
-      setFileSystem((currentFileSystem) => applyStatuses(currentFileSystem));
+        const checkAndUpdateStatuses = (nodes) => {
+          return nodes.map((node) => {
+            const newStatus = statusMap[node.path] || (isRepo ? "" : null);
+            if (node.status !== newStatus) {
+              needsUpdate = true;
+            }
+
+            const newNode = { ...node, status: newStatus };
+
+            if (node.children) {
+              newNode.children = checkAndUpdateStatuses(node.children);
+            }
+            return newNode;
+          });
+        };
+
+        const newFileSystem = checkAndUpdateStatuses(currentFileSystem);
+        if (needsUpdate) {
+          return newFileSystem;
+        }
+        return currentFileSystem;
+      });
     },
     [setFileSystem]
   );
@@ -177,21 +220,6 @@ export default function TerminalWindow({
     // Syncs Git status -> React state whenever files change
     updateFileSystemGitStatus("/");
   }, [fileSystem, updateFileSystemGitStatus]);
-
-  const printPrompt = useCallback(
-    (terminalId) => {
-      const termState = terminals.find((t) => t.id === terminalId);
-      const termInstance = xtermInstances.current[terminalId]?.term;
-      if (!termState || !termInstance || termInstance.isDisposed) return;
-      commandBuffers.current[terminalId] = "";
-      inputBuffers.current[terminalId] = "";
-      const user = colorText("orbit", "green");
-      const sep = colorText(` ${termState.cwd}`, "magenta");
-      const dollar = colorText(" $ ", "white");
-      safeWrite(termInstance, `\r\n${user}${sep}${dollar}`);
-    },
-    [terminals]
-  );
 
   const handleNewTerminal = () => {
     const newIdVal = nextId.current++;
