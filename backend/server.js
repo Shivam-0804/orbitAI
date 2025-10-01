@@ -16,7 +16,7 @@ app.use(express.json());
 executor(wss);
 
 // HTTP route for running code directly
-app.post("/run", async (req, res) => {
+app.post("/api/run", async (req, res) => {
   const { fileSystem, entryPath } = req.body;
 
   if (!fileSystem || !entryPath) {
@@ -39,7 +39,7 @@ app.post("/run", async (req, res) => {
   }
 });
 
-app.route("/user", userRoutes);
+app.route("/api/user", userRoutes);
 
 server.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT}`);
