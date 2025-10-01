@@ -26,7 +26,8 @@ export default function useServerCompiler(
   const runWSFile = useCallback(
     (entryPath) => {
       if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-        wsRef.current = new WebSocket("wss://orbitai-y83c.onrender.com");
+        const WS_URL = import.meta.env.VITE_WS_URL;
+        wsRef.current = new WebSocket(WS_URL);
 
         wsRef.current.onopen = () => {
           setIsExecuting(true);
@@ -73,7 +74,8 @@ export default function useServerCompiler(
     async (entryPath) => {
       try {
         setIsExecuting(true);
-        const res = await fetch("https://orbitai-y83c.onrender.com/api/run", {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/run`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ entryPath, fileSystem }),

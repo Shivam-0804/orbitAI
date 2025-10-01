@@ -6,7 +6,7 @@
   width: 100%;
   padding: 0.5rem 1rem;
   background-color: #181818;
-  border-bottom: 0.1px solid #a09f9f;
+  border-bottom: 0.1px solid #5d5d5dff;
   color: white;
 }
 
@@ -127,4 +127,10 @@
 
 .run {
   height: 1.7rem;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }

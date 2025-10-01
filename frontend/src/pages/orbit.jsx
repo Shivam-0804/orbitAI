@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from "react";
+import { useState, lazy, Suspense, useRef } from "react";
 import { loader } from "@monaco-editor/react";
 import Header from "../components/header.jsx";
 import Options from "../components/options.jsx";
@@ -81,6 +81,7 @@ export default function Orbit() {
   const [isRenaming, setIsRenaming] = useState(null);
   const [error, setError] = useState(false);
   const [showTerminal, setShowTerminal] = useState(false);
+  const terminalApiRef=useRef(null);
 
   const findNodeByPath = (nodes, path) => {
     for (const node of nodes) {
@@ -340,7 +341,10 @@ export default function Orbit() {
         <Header />
         <Menu
           initialFileSystem={initialFileSystem}
+          showTerminal={showTerminal}
+          activeTab={activeTab}
           setShowTerminal={setShowTerminal}
+          terminalApiRef={terminalApiRef}
         />
         <div
           style={{ display: "flex", flexGrow: 1, minHeight: 0, minWidth: 0 }}
@@ -406,6 +410,7 @@ export default function Orbit() {
               setFileSystem={setFileSystem}
               showTerminal={showTerminal}
               setShowTerminal={setShowTerminal}
+              terminalApiRef={terminalApiRef}
             />
           </div>
         </div>

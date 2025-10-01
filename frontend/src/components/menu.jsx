@@ -171,8 +171,16 @@ function MenuOption({ title, subOptions, activeMenu, setActiveMenu }) {
   );
 }
 
-export default function Menu({ initialFileSystem, setShowTerminal }) {
+export default function Menu({
+  initialFileSystem,
+  showTerminal,
+  setShowTerminal,
+  activeTab,
+  terminalApiRef,
+}) {
   const [activeMenu, setActiveMenu] = useState(null);
+  const [commandToRun, setCommandToRun] = useState(null);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.altKey && e.ctrlKey && e.key.toLowerCase() === "t") {
@@ -190,6 +198,46 @@ export default function Menu({ initialFileSystem, setShowTerminal }) {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [setShowTerminal]);
+
+  useEffect(() => {
+    if (commandToRun && showTerminal && terminalApiRef?.current) {
+      terminalApiRef.current.runCommand(commandToRun);
+      setCommandToRun(null);
+    }
+  }, [commandToRun, showTerminal, terminalApiRef]);
+
+  const handleRun = () => {
+    if (!activeTab) {
+      alert("No active file to run.");
+      return;
+    }
+
+    const extension = activeTab.split(".").pop();
+    let command = "";
+
+    switch (extension) {
+      case "py":
+        command = `python ${activeTab}`;
+        break;
+      case "js":
+        command = `run ${activeTab}`;
+        break;
+      case "cpp":
+        command = `cpp ${activeTab}`;
+        break;
+      default:
+        alert(
+          `Running files with the ".${extension}" extension is not supported.`
+        );
+        return;
+    }
+
+    setCommandToRun(command);
+    if (!showTerminal) {
+      setShowTerminal(true);
+    }
+  };
+
   return (
     <div className={styles.mainMenu}>
       {/* Left menu */}
@@ -207,7 +255,12 @@ export default function Menu({ initialFileSystem, setShowTerminal }) {
 
       {/* Right side controls */}
       <div className={styles.moreOptions}>
-        <Play className={styles.run} />
+        <div title={activeTab ? "Run" : "No active file to run"}>
+          <Play
+            className={`${styles.run} ${!activeTab ? styles.disabled : ""}`}
+            onClick={handleRun}
+          />
+        </div>
         <MoreHorizontal className={styles.otherOptions} />
       </div>
     </div>
