@@ -26,7 +26,7 @@ export default function useServerCompiler(
   const runWSFile = useCallback(
     (entryPath) => {
       if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-        wsRef.current = new WebSocket("ws://localhost:3001");
+        wsRef.current = new WebSocket("wss://orbitai-y83c.onrender.com");
 
         wsRef.current.onopen = () => {
           setIsExecuting(true);
