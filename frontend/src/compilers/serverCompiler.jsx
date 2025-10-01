@@ -73,7 +73,7 @@ export default function useServerCompiler(
     async (entryPath) => {
       try {
         setIsExecuting(true);
-        const res = await fetch("http://localhost:3001/api/run", {
+        const res = await fetch("https://orbitai-y83c.onrender.com/api/run", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ entryPath, fileSystem }),
