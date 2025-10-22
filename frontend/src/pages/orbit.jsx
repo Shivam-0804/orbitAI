@@ -81,7 +81,8 @@ export default function Orbit() {
   const [isRenaming, setIsRenaming] = useState(null);
   const [error, setError] = useState(false);
   const [showTerminal, setShowTerminal] = useState(false);
-  const terminalApiRef=useRef(null);
+  const [showOptions, setShowOPtions] = useState(0);
+  const terminalApiRef = useRef(null);
 
   const findNodeByPath = (nodes, path) => {
     for (const node of nodes) {
@@ -340,6 +341,7 @@ export default function Orbit() {
       >
         <Header />
         <Menu
+          setFileSystem={setFileSystem}
           initialFileSystem={initialFileSystem}
           showTerminal={showTerminal}
           activeTab={activeTab}
@@ -349,7 +351,12 @@ export default function Orbit() {
         <div
           style={{ display: "flex", flexGrow: 1, minHeight: 0, minWidth: 0 }}
         >
-          <Options option={option} setOption={setOption} />
+          <Options
+            option={option}
+            setOption={setOption}
+            showOptions={showOptions}
+            setShowOPtions={setShowOPtions}
+          />
           <FileTab
             option={option}
             fileSystem={fileSystem[0]?.children || []}
@@ -362,6 +369,7 @@ export default function Orbit() {
             activeTab={activeTab}
             error={error}
             setError={setError}
+            showOptions={showOptions}
           />
           <div
             style={{

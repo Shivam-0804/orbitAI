@@ -4,6 +4,7 @@ import Explorer from "./explorer";
 
 function Filetab({
   option,
+  showOptions,
   fileSystem,
   handleFileClick,
   handleDelete,
@@ -37,18 +38,20 @@ function Filetab({
           onResizeStart={() => setIsResizing(true)}
           onResizeStop={() => setIsResizing(false)}
         >
-          <Explorer
-            fileSystem={fileSystem}
-            handleFileClick={handleFileClick}
-            handleDelete={handleDelete}
-            handleStartCreate={handleStartCreate}
-            handleStartRename={handleStartRename}
-            isCreating={isCreating}
-            isRenaming={isRenaming}
-            activeTab={activeTab}
-            error={error}
-            setError={setError}
-          />
+          {showOptions === 0 && (
+            <Explorer
+              fileSystem={fileSystem}
+              handleFileClick={handleFileClick}
+              handleDelete={handleDelete}
+              handleStartCreate={handleStartCreate}
+              handleStartRename={handleStartRename}
+              isCreating={isCreating}
+              isRenaming={isRenaming}
+              activeTab={activeTab}
+              error={error}
+              setError={setError}
+            />
+          )}
         </Resizable>
       ) : null}
     </>

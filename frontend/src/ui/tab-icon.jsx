@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 // eslint-disable-next-line no-unused-vars
-function Icon({ color, IconComponent, selected, value, onClick }) {
+function Icon({ color, IconComponent, selected, value, onClick, style = {} }) {
   const [hover, setHover] = useState(false);
 
   return (
@@ -16,6 +16,7 @@ function Icon({ color, IconComponent, selected, value, onClick }) {
         color: hover ? "#fff" : color,
         transition: "all 0.1s ease-in-out",
         padding: "10px 0",
+        ...style,
       }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
@@ -24,7 +25,8 @@ function Icon({ color, IconComponent, selected, value, onClick }) {
         style={{
           height: "150%",
           width: "3px",
-          backgroundColor: selected === value ? "#4051b5" : "transparent",
+          backgroundColor:
+            selected === value? "#4051b5" : "transparent",
           marginRight: "10px",
         }}
       />
