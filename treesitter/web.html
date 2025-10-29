@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tree-sitter live parser</title>
+  <style>
+    body { font-family: system-ui, Arial; padding: 20px; }
+    select, textarea { width: 100%; box-sizing: border-box; }
+    textarea { height: 300px; font-family: monospace; font-size: 14px; }
+    pre { background: #f7f7f7; padding: 12px; border-radius: 6px; overflow: auto; max-height: 400px }
+    .row { margin-bottom: 12px }
+  </style>
+</head>
+<body>
+  <h2>Live Tree-sitter parser</h2>
+
+  <div class="row">
+    <label for="lang">Language:</label>
+    <select id="lang">
+      <option value="">(auto detect)</option>
+      <option value="python">Python</option>
+      <option value="javascript">JavaScript</option>
+      <option value="c">C</option>
+      <option value="cpp">C++</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <label for="code">Code (edits are sent to server on input):</label>
+    <textarea id="code" placeholder="Write code here..."></textarea>
+  </div>
+
+  <div class="row">
+    <label>Parse tree:</label>
+    <pre id="tree">(tree will appear here)</pre>
+  </div>
+
+  <script>
+    const codeEl = document.getElementById('code')
+    const treeEl = document.getElementById('tree')
+    const langEl = document.getElementById('lang')
+
+    let timeout = null
+    const debounceMs = 250
+
+    async function send() {
+      const code = codeEl.value
+      const language = langEl.value || null
+      try {
+        const res = await fetch('http://127.0.0.1:5000/parse', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, language })
+        })
+        const j = await res.json()
+        if (j.tree) {
+          treeEl.textContent = j.tree
+        } else if (j.error) {
+          treeEl.textContent = 'ERROR: ' + j.error
+        } else {
+          treeEl.textContent = JSON.stringify(j)
+        }
+      } catch (err) {
+        treeEl.textContent = 'Request failed: ' + err.message
+      }
+    }
+
+    function queueSend() {
+      if (timeout) clearTimeout(timeout)
+      timeout = setTimeout(send, debounceMs)
+    }
+
+    codeEl.addEventListener('input', queueSend)
+    langEl.addEventListener('change', () => queueSend())
+
+    // seed with a sample
+    codeEl.value = '// select language above or leave blank for autodetect\nconsole.log("hello world")\n'
+    queueSend()
+  </script>
+</body>
+</html>
