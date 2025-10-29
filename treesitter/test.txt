@@ -1,0 +1,19 @@
+// Intentional JavaScript test with syntax errors
+import fs from 'fs'
+
+function greet(name { // MISSING: closing parenthesis
+    console.log("Hello, " + name);
+}
+
+const twice = (n) => {
+    return n * 2; // MISSING: closing brace for function
+
+const broken = ; // MISSING: initializer
+
+console.log("This is an unterminated string);
+
+let arr = [1, 2, 3; // MISSING: closing bracket
+
+let obj = { a: 1, b: 2, }; // trailing comma ok
+
+return 42; // TOP-LEVEL return is a syntax error in modules/strict contexts
