@@ -1,0 +1,63 @@
+.previewWrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #111;
+}
+
+.previewHeader {
+  display: flex;
+  background: #1f1f1f;
+  border-bottom: 1px solid #333;
+  user-select: none;
+  font-size: 14px;
+}
+
+.previewHeader span {
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.activeTab {
+  color: white;
+  border-bottom: 2px solid #3f52b5;
+}
+
+.inactiveTab {
+  color: #999;
+}
+
+.previewArea {
+  width: 100%;
+  transition: height 0.2s ease;
+}
+
+.previewIframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: white;
+}
+
+.consoleArea {
+  height: 20%;
+  width: 100%;
+  background: #0d0d0d;
+  border-top: 1px solid #444;
+  padding: 6px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 13px;
+  color: #eee;
+}
+
+.consoleLine {
+  margin: 2px 0;
+}
+
+.consoleEmpty {
+  opacity: 0.5;
+  text-align: center;
+  margin-top: 12px;
+}

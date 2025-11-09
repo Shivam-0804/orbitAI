@@ -32,6 +32,8 @@
     "prettier": "^3.6.2",
     "pyodide": "^0.28.2",
     "pyright": "^1.1.405",
+    "quickjs-emscripten": "^0.31.0",
+    "quickjs-emscripten-core": "^0.31.0",
     "re-resizable": "^6.11.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -51,6 +53,7 @@
     "web-tree-sitter": "^0.25.9",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0",
+    "xterminal": "^2.1.12",
     "yup": "^1.7.1"
   },
   "devDependencies": {

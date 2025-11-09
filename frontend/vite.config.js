@@ -3,6 +3,10 @@ import react from "@vitejs/plugin-react";
 
 // https://vite.dev/config/
 export default defineConfig({
+  assetsInclude: ["**/*.wasm"],
+  optimizeDeps: {
+    exclude: ["quickjs-emscripten"],
+  },
   plugins: [react()],
   define: {
     "process.env": {},

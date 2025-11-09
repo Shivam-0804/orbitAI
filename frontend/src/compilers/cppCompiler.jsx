@@ -1,140 +1,161 @@
+// compilers/cppCompiler.js
 import { useState, useEffect, useRef } from "react";
-import { WASI } from "@bjorn3/browser_wasi_shim";
-import untar from "js-untar";
-
-// Modern Wasm-hosted Clang package (from Wasmer or similar)
-const WASM_CLANG_URL = "/clang-assets/wasi-sdk/clang.wasm"; // place your WASI SDK wasm file here
-const SYSROOT_URL = "/clang-assets/wasi-sdk/sysroot.tar";  // prebuilt sysroot archive for WASI SDK
 
 export default function useCppCompiler({ fileSystem }) {
   const [isReady, setIsReady] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const [initError, setInitError] = useState(null);
-  const clangRef = useRef(null);
-  const inputResolveRef = useRef(null);
+  const vmRef = useRef(null);
+
+  /**
+   * Wait until WebVM global object is available.
+   * More robust than previous version which failed early.
+   */
+  function waitForWebVM() {
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const timer = setInterval(() => {
+        if (window.WebVM && typeof window.WebVM.boot === "function") {
+          clearInterval(timer);
+          return resolve(window.WebVM);
+        }
+        if (attempts++ > 300) { // ~15 seconds
+          clearInterval(timer);
+          return reject(new Error("WebVM failed to load (boot.js missing or blocked)"));
+        }
+      }, 50);
+    });
+  }
 
   useEffect(() => {
-    async function initializeCompiler() {
+    let mounted = true;
+    (async () => {
       try {
-        // Fetch wasm clang and sysroot
-        const [clangResp, sysrootResp] = await Promise.all([
-          fetch(WASM_CLANG_URL),
-          fetch(SYSROOT_URL),
-        ]);
+        const WebVM = await waitForWebVM();
 
-        const clangBytes = new Uint8Array(await clangResp.arrayBuffer());
-        const sysroot = await sysrootResp.arrayBuffer();
-        const extractedFiles = await untar(sysroot);
-
-        // Initialize virtual FS for clang
-        const clang = {
-          fs: {
-            files: {},
-            mkdirp(path) { this.files[path] = this.files[path] || {}; },
-            writeFile(path, content) { this.files[path] = content; },
-            readFile(path) { return this.files[path]; },
-          },
-          async compile(args) {
-            // This is a simplified WASI SDK compilation runner.
-            // You would replace this with Wasmer runtime call or another Wasm-hosted Clang execution.
-            console.log("Pretend compiling:", args.join(" "));
-            return { ok: true, stderr: "" };
-          },
-        };
-
-        // Populate FS with sysroot
-        extractedFiles.forEach((file) => {
-          const dir = file.name.substring(0, file.name.lastIndexOf("/"));
-          if (dir) clang.fs.mkdirp(dir);
-          clang.fs.writeFile(file.name, file.buffer);
+        // Boot a Linux VM
+        const vm = await WebVM.boot({
+          memory: 1024,
+          cpu: 2
         });
+        if (!mounted) return;
 
-        clangRef.current = clang;
+        vmRef.current = vm;
+
+        // Prepare workspace directory
+        await exec(vm, ["mkdir", "-p", "/workspace"]);
+
         setIsReady(true);
-        console.log("C++ Compiler (WASI SDK) loaded and ready.");
       } catch (err) {
-        console.error("Failed to initialize C++ compiler:", err);
-        setInitError(err.message);
+        console.error("WebVM init failed:", err);
+        setInitError(err.message || String(err));
       }
-    }
-
-    initializeCompiler();
+    })();
+    return () => (mounted = false);
   }, []);
 
-  const syncFileSystem = (clang, node, currentPath) => {
-    if (node && node.children) {
-      node.children.forEach((child) => {
-        const childPath = `${currentPath === "/" ? "" : currentPath}/${child.name}`;
-        if (child.type === "folder") {
-          clang.fs.mkdirp(childPath);
-          syncFileSystem(clang, child, childPath);
-        } else if (child.type === "file") {
-          clang.fs.writeFile(childPath, child.content || "");
-        }
-      });
-    }
+  /**
+   * Execute a command inside WebVM
+   */
+  const exec = (vm, argv, handlers = {}) => {
+    const run = vm.exec ?? vm.run;
+    return run.call(vm, argv, {
+      stdout: (c) => handlers.onStdout?.(decode(c)),
+      stderr: (c) => handlers.onStderr?.(decode(c)),
+      stdin: handlers.stdin
+    });
   };
 
+  const decode = (chunk) =>
+    typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
+
+  /**
+   * Write file to VM using safe here-doc
+   */
+  async function writeFile(vm, absPath, contents) {
+    await exec(vm, [
+      "/bin/sh",
+      "-lc",
+      `cat > '${absPath.replace(/'/g, "'\\''")}' << 'EOF'\n${contents}\nEOF`
+    ]);
+  }
+
+  /**
+   * Recursively sync user project file tree into /workspace
+   */
+  async function syncToWorkspace(vm, node, base = "/workspace") {
+    const target = base + "/" + node.name;
+    if (node.type === "folder") {
+      await exec(vm, ["mkdir", "-p", target]);
+      for (const child of node.children) await syncToWorkspace(vm, child, target);
+    } else if (node.type === "file") {
+      await writeFile(vm, target, node.content ?? "");
+    }
+  }
+
+  /**
+   * Public API: compile + run
+   */
   const runCpp = async (filePath, { stdout, stderr, onExit }) => {
-    if (!isReady) { stderr("C++ Compiler is not ready.\n"); onExit(); return; }
-    if (isExecuting) { stderr("Another process is already running.\n"); onExit(); return; }
+    if (!isReady) {
+      stderr?.("⚠️ C++ Compiler is still loading...\nTry again in a few seconds.\n");
+      onExit?.();
+      return;
+    }
 
     setIsExecuting(true);
-    const clang = clangRef.current;
-    const outputFileName = "main.wasm";
+    const vm = vmRef.current;
 
     try {
-      stdout("Compiling C++ code...\n");
+      stdout("Syncing project into VM...\n");
 
-      const root = Array.isArray(fileSystem) ? fileSystem[0] : fileSystem;
-      syncFileSystem(clang, root, "");
+      if (Array.isArray(fileSystem)) {
+        for (const item of fileSystem) await syncToWorkspace(vm, item);
+      } else {
+        await syncToWorkspace(vm, fileSystem);
+      }
 
-      const compileResult = await clang.compile([filePath, "-I.", "-o", outputFileName]);
-      if (compileResult.stderr) stderr(compileResult.stderr);
-      if (!compileResult.ok) throw new Error("Compilation failed.");
+      const insidePath = "/workspace/" + filePath.replace(/^\//, "");
 
-      stdout("Compilation successful.\n---\n");
-      const compiledWasm = clang.fs.readFile(outputFileName);
+      stdout(`Compiling: ${insidePath}\n`);
 
-      const textDecoder = new TextDecoder();
-      const textEncoder = new TextEncoder();
-      let inputBuffer = null;
+      await exec(vm, [
+        "g++",
+        insidePath,
+        "-std=c++17",
+        "-O2",
+        "-o",
+        "/workspace/a.out"
+      ], {
+        onStdout: stdout,
+        onStderr: stderr
+      });
 
-      const fds = [
-        { read: (buf, offset, length) => {
-            if (!inputBuffer || inputBuffer.length === 0) {
-              return { nread: 0 };
-            }
-            const nread = Math.min(length, inputBuffer.length);
-            buf.set(inputBuffer.subarray(0, nread), offset);
-            inputBuffer = inputBuffer.subarray(nread);
-            return { nread };
-          }
-        },
-        { write: (buf) => { stdout(textDecoder.decode(buf, { stream: true })); return buf.length; } },
-        { write: (buf) => { stderr(textDecoder.decode(buf, { stream: true })); return buf.length; } },
-      ];
+      stdout("✅ Compilation successful.\n--- Running program ---\n");
 
-      const wasi = new WASI([], [], fds);
-      const wasmModule = await WebAssembly.compile(compiledWasm);
-      const instance = await WebAssembly.instantiate(wasmModule, wasi.getImports(wasmModule));
-      await wasi.start(instance);
+      await exec(vm, ["/workspace/a.out"], {
+        onStdout: stdout,
+        onStderr: stderr
+      });
 
     } catch (err) {
-      stderr(`\n--- C++ Execution Error ---\n${err.message}\n`);
+      stderr(`\n❌ Execution Error: ${err.message}\n`);
     } finally {
       setIsExecuting(false);
-      inputResolveRef.current = null;
-      onExit();
+      onExit?.();
     }
   };
 
-  const sendInput = (data) => {
-    if (inputResolveRef.current) {
-      inputResolveRef.current(data);
-      inputResolveRef.current = null;
-    }
-  };
+  // Terminal integration compatibility
+  const sendInput = () => {}; 
+  const killExecution = () => {}; 
 
-  return { runCpp, sendInput, isExecuting, isReady, initError };
+  return {
+    runCpp,
+    sendInput,
+    killExecution,
+    isExecuting,
+    isReady,
+    initError
+  };
 }
