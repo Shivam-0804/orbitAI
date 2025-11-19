@@ -18,7 +18,10 @@ import usePyodide from "../compilers/pythonCompiler";
 import useServerCompiler from "../compilers/serverCompiler";
 import useCppCompiler from "../compilers/cppCompiler";
 import useQuickJS from "../compilers/jsCompiler.js";
+
+// Panels
 import PreviewWindow from "../components/previewWindow.jsx";
+import TestCasePanel from "../components/TestCasePanel";
 
 // Git imports
 import git from "isomorphic-git";
@@ -44,6 +47,8 @@ export default function TerminalWindow({
   setShowTerminal,
   resetTerminalRef,
   terminalApiRef,
+  openTabs,
+  activeTab,
 }) {
   const jsCompiler = useQuickJS({ fileSystem });
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -64,6 +69,7 @@ export default function TerminalWindow({
   const [installedPackages, setInstalledPackages] = useState(new Set());
   const [credentials, setCredentials] = useState(null);
 
+  const activeFile = openTabs.find((tab) => tab.path === activeTab) || null;
   const pyodide = usePyodide({
     fileSystem,
     onPackageInstall: (pkg) =>
@@ -1044,15 +1050,17 @@ export default function TerminalWindow({
       >
         <header className={styles.terminalHeader}>
           <div className={styles.headerLeft}>
-            {["PROBLEMS", "TERMINAL", "PREVIEW", "DEBUG"].map((view) => (
-              <span
-                key={view}
-                className={`${styles.viewTab} ${activeView === view ? styles.activeViewTab : ""}`}
-                onClick={() => setActiveView(view)}
-              >
-                {view}
-              </span>
-            ))}
+            {["PROBLEMS", "TERMINAL", "PREVIEW", "DEBUG", "TEST CASE"].map(
+              (view) => (
+                <span
+                  key={view}
+                  className={`${styles.viewTab} ${activeView === view ? styles.activeViewTab : ""}`}
+                  onClick={() => setActiveView(view)}
+                >
+                  {view}
+                </span>
+              )
+            )}
           </div>
           <div className={styles.headerRight}>
             {activeView === "TERMINAL" && (
@@ -1125,12 +1133,19 @@ export default function TerminalWindow({
             }}
           />
         )}
-
-        {activeView !== "TERMINAL" && activeView !== "PREVIEW" && (
+        {activeView === "TEST CASE" && (
           <div className={styles.placeholderView}>
-            <p>{activeView} view is not implemented yet.</p>
+            <TestCasePanel codeToTest={activeFile?.content} />
           </div>
         )}
+
+        {activeView !== "TERMINAL" &&
+          activeView !== "PREVIEW" &&
+          activeView !== "TEST CASE" && (
+            <div className={styles.placeholderView}>
+              <p>{activeView} view is not implemented yet.</p>
+            </div>
+          )}
       </Resizable>
     </>
   );

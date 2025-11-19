@@ -6,14 +6,13 @@ import About from "./about";
 import { Buffer } from "buffer";
 window.Buffer = Buffer;
 
-
 export default function Home() {
   return (
     <>
-      <HomePage />
-      <Features />
-      <AIComponent />
-      <About />
+    <HomePage />
+    <Features />
+    <AIComponent />
+    <About />
     </>
   );
 }
