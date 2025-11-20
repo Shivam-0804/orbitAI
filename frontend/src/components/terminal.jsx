@@ -2,7 +2,7 @@
 /* eslint-disable no-case-declarations */
 import { Resizable } from "re-resizable";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { X, Plus, Trash2, RotateCcw } from "lucide-react";
+import { X, Plus, Trash2, RotateCcw, MessageCircleWarning } from "lucide-react";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
@@ -22,6 +22,8 @@ import useQuickJS from "../compilers/jsCompiler.js";
 // Panels
 import PreviewWindow from "../components/previewWindow.jsx";
 import TestCasePanel from "../components/TestCasePanel";
+import ExplainFixPanel from "../components/explainFixError.jsx";
+import ExplainCodePanel from "../components/explainCode.jsx";
 
 // Git imports
 import git from "isomorphic-git";
@@ -70,6 +72,40 @@ export default function TerminalWindow({
   const [credentials, setCredentials] = useState(null);
 
   const activeFile = openTabs.find((tab) => tab.path === activeTab) || null;
+  const [showExplain, setShowExplain] = useState(false);
+
+  function getLastNCommandBlocks(term, n = 2) {
+    if (!term) return "";
+
+    const buffer = term.buffer.active;
+    const lines = [];
+
+    for (let i = 0; i < buffer.length; i++) {
+      const text = buffer.getLine(i)?.translateToString(true) || "";
+      lines.push(text);
+    }
+
+    let blocks = [];
+    let currentBlock = [];
+
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i];
+      currentBlock.unshift(line);
+
+      if (line.includes("$")) {
+        blocks.push(currentBlock);
+        currentBlock = [];
+
+        if (blocks.length === n) break;
+      }
+    }
+
+    return blocks
+      .reverse()
+      .map((blk) => blk.join("\n"))
+      .join("\n");
+  }
+
   const pyodide = usePyodide({
     fileSystem,
     onPackageInstall: (pkg) =>
@@ -1035,7 +1071,7 @@ export default function TerminalWindow({
   return (
     <>
       <Resizable
-        defaultSize={{ width: "100%", height: "30%" }}
+        defaultSize={{ width: "100%", height: "35%" }}
         minHeight="5%"
         maxHeight="90%"
         enable={{ top: true }}
@@ -1046,11 +1082,12 @@ export default function TerminalWindow({
           display: showTerminal ? "flex" : "none",
           flexDirection: "column",
           backgroundColor: "#1a1a1a",
+          overflow: "hidden",
         }}
       >
         <header className={styles.terminalHeader}>
           <div className={styles.headerLeft}>
-            {["PROBLEMS", "TERMINAL", "PREVIEW", "DEBUG", "TEST CASE"].map(
+            {["PROBLEMS", "TERMINAL", "PREVIEW", "EXPLAIN", "TEST CASE"].map(
               (view) => (
                 <span
                   key={view}
@@ -1065,6 +1102,13 @@ export default function TerminalWindow({
           <div className={styles.headerRight}>
             {activeView === "TERMINAL" && (
               <>
+                <MessageCircleWarning
+                  size={16}
+                  className={styles.actionIcon}
+                  title="Error Panel"
+                  style={{ color: "#FFD6D6", cursor: "pointer" }}
+                  onClick={() => setShowExplain((prev) => !prev)}
+                />
                 <Plus
                   size={18}
                   className={styles.actionIcon}
@@ -1118,10 +1162,26 @@ export default function TerminalWindow({
               </div>
             ))}
           </div>
-          <div
-            ref={terminalContainerRef}
-            className={styles.terminalsContainer}
-          />
+          <div style={{ display: "flex" }}>
+            <div
+              ref={terminalContainerRef}
+              className={styles.terminalsContainer}
+            />
+            {showExplain && (
+              <div style={{ width: "300px", borderLeft: "1px solid #333" }}>
+                <ExplainFixPanel
+                  codeToFix={
+                    xtermInstances.current[activeTerminalId]?.term
+                      ? getLastNCommandBlocks(
+                          xtermInstances.current[activeTerminalId]?.term,
+                          2
+                        )
+                      : ""
+                  }
+                />
+              </div>
+            )}
+          </div>
         </div>
         {activeView === "PREVIEW" && (
           <PreviewWindow
@@ -1138,14 +1198,20 @@ export default function TerminalWindow({
             <TestCasePanel codeToTest={activeFile?.content} />
           </div>
         )}
+        {activeView === "EXPLAIN" && (
+          <div
+            className={styles.placeholderView}
+            style={{ height: "100%", flex: 1, display: "flex" }}
+          >
+            <ExplainCodePanel codeToExplain={activeFile?.content} />
+          </div>
+        )}
 
-        {activeView !== "TERMINAL" &&
-          activeView !== "PREVIEW" &&
-          activeView !== "TEST CASE" && (
-            <div className={styles.placeholderView}>
-              <p>{activeView} view is not implemented yet.</p>
-            </div>
-          )}
+        {activeView === "PROBLEM" && (
+          <div className={styles.placeholderView}>
+            <p>{activeView} view is not implemented yet.</p>
+          </div>
+        )}
       </Resizable>
     </>
   );

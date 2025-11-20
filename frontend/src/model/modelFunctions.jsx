@@ -82,6 +82,7 @@ export const WebLLMProvider = ({ children }) => {
   const generateTests = (input, onUpdate) => runAI("test", input, onUpdate);
   const fixError = (input, onUpdate) => runAI("fix", input, onUpdate);
   const chat = (input, onUpdate) => runAI("chat", input, onUpdate);
+  const explainCode = (input, onUpdate) => runAI("explain", input, onUpdate);
 
   // 6. VALUE EXPOSED TO APP
   const value = {
@@ -90,6 +91,7 @@ export const WebLLMProvider = ({ children }) => {
     generateCode,
     generateTests,
     fixError,
+    explainCode,
     chat,
   };
 

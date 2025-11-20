@@ -27,35 +27,437 @@ const initialFileSystem = [
     path: "/",
     status: "",
     children: [
-      // {
-      //   type: "file",
-      //   name: "README.md",
-      //   path: "/README.md",
-      //   content: "This is a project readme.",
-      //   status: "M", // 'M' indicates the file has been Modified
-      // },
-      // {
-      //   type: "folder",
-      //   name: "src",
-      //   path: "/src",
-      //   status: "", // A folder's status is implicitly based on its contents
-      //   children: [
-      //     {
-      //       type: "file",
-      //       name: "index.js",
-      //       path: "/src/index.js",
-      //       content: "console.log('hello world');",
-      //       status: "A", // 'A' indicates the file is new and has been Added (staged)
-      //     },
-      //   ],
-      // },
-      // {
-      //   type: "file",
-      //   name: "package.json",
-      //   path: "/package.json",
-      //   content: '{ "name": "my-app" }',
-      //   status: "", // An empty status means the file is tracked and unmodified
-      // },
+      {
+        type: "folder",
+        name: "frontend",
+        path: "/frontend",
+        status: "",
+        children: [
+          {
+            type: "file",
+            name: "index.html",
+            path: "/src/index.html",
+            content: `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bubble Sort Demo</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="card" role="application" aria-label="Bubble sort demo">
+    <div class="left">
+      <h1>Bubble Sort — interactive demo</h1>
+      <p class="muted">Enter numbers separated by spaces or commas, then press <strong>Sort</strong>. Use <em>Animate</em> to watch swaps.</p>
+
+      <div class="controls" aria-hidden="false">
+        <input id="inputNumbers" type="text" placeholder="e.g. 5 2 9 1 3" aria-label="Numbers input" />
+        <button id="sortBtn">Sort</button>
+        <button id="animateBtn" class="small">Animate</button>
+        <button id="resetBtn" class="small">Reset</button>
+      </div>
+
+      <div>
+        <label><input id="descending" type="checkbox" /> <span style="color:var(--muted)">Sort descending</span></label>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div><strong>Original:</strong></div>
+        <div id="original" class="resultBox arrayRow" aria-live="polite"></div>
+
+        <div style="margin-top:12px;"><strong>Sorted:</strong></div>
+        <div id="sorted" class="resultBox arrayRow" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <div class="right">
+      <div>
+        <strong>Steps / Log</strong>
+        <div id="log" class="log" aria-live="polite"></div>
+      </div>
+
+      <div>
+        <strong>Controls</strong>
+        <p class="muted" style="margin:6px 0 0 0;">Animation speed (ms): 
+          <input id="speed" type="range" min="50" max="1000" value="300" /> 
+          <span id="speedVal">300</span>ms
+        </p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>Simple educational demo • Bubble sort complexity: O(n²)</div>
+      <div>Tip: use spaces or commas between numbers</div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+`,
+            status: "", // 'A' indicates the file is new and has been Added (staged)
+          },
+          {
+            type: "file",
+            name: "style.css",
+            path: "/style.css",
+            content: `:root{
+  --bg:#0f1724; --card:#0b1220; --accent:#4f46e5; --text:#e6eef8;
+  --muted:#9aa7bf;
+}
+
+body{
+  margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+  background:linear-gradient(180deg,#071028 0%, #07142a 100%);
+  color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center;
+  padding:28px;
+}
+
+.card{
+  width:900px; max-width:100%; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:12px; box-shadow:0 10px 30px rgba(2,6,23,0.6); padding:20px;
+  display:grid; grid-template-columns: 1fr 320px; gap:18px;
+}
+
+h1{ margin:0 0 10px 0; font-size:20px; letter-spacing:0.2px; }
+p.muted{ color:var(--muted); margin:0 0 12px 0; font-size:13px; }
+
+.controls { display:flex; gap:8px; margin-bottom:12px; align-items:center; }
+
+input[type="text"]{
+  flex:1; padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);
+  background:transparent; color:var(--text); outline:none; font-size:14px;
+}
+
+button{
+  background:var(--accent); color:white; border:0; padding:10px 12px; border-radius:8px;
+  cursor:pointer; font-weight:600;
+}
+
+.small {
+  padding:8px 10px; font-size:13px; 
+  background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--text);
+}
+
+.resultBox { margin-top:10px; background:rgba(255,255,255,0.02); padding:12px; border-radius:8px; min-height:56px; }
+
+.arrayRow { display:flex; gap:8px; flex-wrap:wrap; }
+
+.item {
+  min-width:40px; height:40px; background:rgba(255,255,255,0.03); display:flex; align-items:center; justify-content:center;
+  border-radius:8px; font-weight:700; color:var(--text); border:1px solid rgba(255,255,255,0.03);
+  transition: transform .18s ease, background-color .18s ease, border-color .18s ease;
+}
+
+.item.active { background: rgba(80, 102, 255, 0.95); transform: translateY(-6px); }
+.item.swap { background: rgba(244, 63, 94, 0.95); transform: translateY(-6px); }
+
+.right { border-left:1px solid rgba(255,255,255,0.03); padding-left:16px; display:flex; flex-direction:column; gap:10px;}
+
+.log { font-family: ui-monospace, monospace; font-size:13px; color:var(--muted); overflow:auto; max-height:300px; padding:8px; border-radius:8px; background:rgba(255,255,255,0.012); border:1px solid rgba(255,255,255,0.02); }
+
+.footer { grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; margin-top:10px; color:var(--muted); font-size:13px; }
+
+label { font-size:13px; color:var(--muted); display:flex; gap:6px; align-items:center; }
+`,
+            status: "", // An empty status means the file is tracked and unmodified
+          },
+          {
+            type: "file",
+            name: "script.js",
+            path: "/script.js",
+            content: `
+const input = document.getElementById('inputNumbers');
+const sortBtn = document.getElementById('sortBtn');
+const animateBtn = document.getElementById('animateBtn');
+const resetBtn = document.getElementById('resetBtn');
+const originalBox = document.getElementById('original');
+const sortedBox = document.getElementById('sorted');
+const logBox = document.getElementById('log');
+const speed = document.getElementById('speed');
+const speedVal = document.getElementById('speedVal');
+const descendingCheckbox = document.getElementById('descending');
+
+let arr = [];
+let steps = [];
+let animating = false;
+let animTimer = null;
+
+function parseInput(text) {
+  if (!text) return [];
+  return text.split(/[\\s,]+/).filter(s => s.trim().length).map(Number);
+}
+
+function renderArray(container, array, highlight = {}) {
+  container.innerHTML = '';
+  array.forEach((v, i) => {
+    const el = document.createElement('div');
+    el.className = 'item';
+    if (highlight.active && (i === highlight.active[0] || i === highlight.active[1])) el.classList.add('active');
+    if (highlight.swap && (i === highlight.swap[0] || i === highlight.swap[1])) el.classList.add('swap');
+    el.textContent = v;
+    container.appendChild(el);
+  });
+}
+
+function bubbleSortWithSteps(a, desc=false) {
+  const arrCopy = a.slice();
+  const stepsLocal = [];
+
+  for (let i = 0; i < arrCopy.length - 1; i++) {
+    for (let j = 0; j < arrCopy.length - i - 1; j++) {
+      stepsLocal.push({ type:'compare', i:j, j:j+1, array: arrCopy.slice() });
+
+      const shouldSwap = desc ? arrCopy[j] < arrCopy[j+1] : arrCopy[j] > arrCopy[j+1];
+      if (shouldSwap) {
+        [arrCopy[j], arrCopy[j+1]] = [arrCopy[j+1], arrCopy[j]];
+        stepsLocal.push({ type:'swap', i:j, j:j+1, array: arrCopy.slice() });
+      }
+    }
+  }
+  return { sorted: arrCopy, steps: stepsLocal };
+}
+
+function log(msg) {
+  const line = document.createElement('div');
+  line.textContent = msg;
+  logBox.appendChild(line);
+  logBox.scrollTop = logBox.scrollHeight;
+}
+
+function startAnimation(stepsArr) {
+  if (!stepsArr || !stepsArr.length) return;
+  let idx = 0;
+  animating = true;
+  animateBtn.textContent = 'Stop';
+
+  animTimer = setInterval(() => {
+    if (idx >= stepsArr.length) {
+      stopAnimation();
+      renderArray(sortedBox, stepsArr[stepsArr.length-1].array);
+      return;
+    }
+
+    const step = stepsArr[idx++];
+    renderArray(originalBox, step.array, { 
+      active: [step.i, step.j], 
+      swap: step.type === 'swap' ? [step.i, step.j] : null 
+    });
+
+    if (step.type === 'compare') log("Compare index " + step.i + " and " + step.j);
+    else if (step.type === 'swap') log("Swap index " + step.i + " and " + step.j);
+  }, Number(speed.value));
+}
+
+function stopAnimation() {
+  animating = false;
+  animateBtn.textContent = 'Animate';
+  clearInterval(animTimer);
+  animTimer = null;
+}
+
+sortBtn.addEventListener('click', () => {
+  stopAnimation();
+  logBox.innerHTML = '';
+
+  arr = parseInput(input.value);
+  if (!arr.length) return alert("Enter some numbers!");
+
+  const result = bubbleSortWithSteps(arr, descendingCheckbox.checked);
+
+  renderArray(originalBox, arr);
+  renderArray(sortedBox, result.sorted);
+
+  log("Sorted: [" + result.sorted.join(', ') + "]");
+
+  steps = result.steps;
+});
+
+animateBtn.addEventListener('click', () => {
+  if (animating) return stopAnimation();
+
+  if (!steps.length) {
+    arr = parseInput(input.value);
+    if (!arr.length) return alert("Enter numbers first!");
+    const result = bubbleSortWithSteps(arr, descendingCheckbox.checked);
+    steps = result.steps;
+    renderArray(sortedBox, result.sorted);
+  }
+
+  logBox.innerHTML = '';
+  startAnimation(steps);
+});
+
+resetBtn.addEventListener('click', () => {
+  stopAnimation();
+  arr = [];
+  steps = [];
+  input.value = '';
+  originalBox.innerHTML = '';
+  sortedBox.innerHTML = '';
+  logBox.innerHTML = '';
+});
+
+speed.addEventListener('input', () => {
+  speedVal.textContent = speed.value;
+  if (animating) {
+    const s = steps.slice();
+    stopAnimation();
+    startAnimation(s);
+  }
+});
+
+input.value = "5 1 4 2 8";
+`,
+            status: "", // An empty status means the file is tracked and unmodified
+          },
+        ],
+      },
+      {
+        type: "folder",
+        name: "test case",
+        path: "/test case",
+        status: "",
+        children: [
+          {
+            type: "file",
+            name: "test1.py",
+            path: "/test1.py",
+            content: `import random
+
+adjectives = [
+    "Swift", "Mighty", "Silent", "Brave", "Lucky",
+    "Crazy", "Rapid", "Shadow", "Electric", "Golden"
+]
+
+nouns = [
+    "Tiger", "Eagle", "Wizard", "Panther", "Knight",
+    "Ninja", "Falcon", "Coder", "Samurai", "Wolf"
+]
+
+def generate_nickname(name):
+    adj = random.choice(adjectives)
+    noun = random.choice(nouns)
+    return f"{adj} {noun} {name}"
+
+def main():
+    print("=== Nickname Generator ===")
+    user_name = input("Enter your name: ")
+    
+    print("\nGenerating a random nickname for you...")
+    nickname = generate_nickname(user_name)
+    print(f"Your nickname: {nickname}")
+
+if __name__ == "__main__":
+    main()
+`,
+            status: "", // '?' indicates the file is Untracked
+          },
+          {
+            type: "file",
+            name: "test2.py",
+            path: "/test2.py",
+            content: `import datetime
+
+def get_int(prompt):
+    while True:
+        try:
+            return int(input(prompt))
+        except ValueError:
+            print("Invalid integer! Please try again.")
+
+def get_float(prompt):
+    while True:
+        try:
+            return float(input(prompt))
+        except ValueError:
+            print("Invalid float! Please try again.")
+
+def calculate_tax(salary, tax_rate):
+    return salary * (tax_rate / 100)
+
+def save_record(name, salary, tax_rate, tax_amount):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    with open("salary_tax_log.txt", "a") as f:
+        f.write(
+            f"{timestamp} | Name: {name} | Salary: {salary} | "
+            f"Tax Rate: {tax_rate}% | Tax Amount: {tax_amount}\n"
+        )
+
+def main():
+    print("=== Salary Tax Calculator ===")
+    
+    name = input("Enter employee name: ")
+    salary = get_int("Enter monthly salary (integer): ")
+    tax_rate = get_float("Enter tax rate (float): ")
+
+    tax_amount = calculate_tax(salary, tax_rate)
+
+    print("\n--- Result ---")
+    print(f"Employee: {name}")
+    print(f"Salary: ₹{salary}")
+    print(f"Tax Rate: {tax_rate}%")
+    print(f"Tax Amount: ₹{tax_amount}")
+
+    save_record(name, salary, tax_rate, tax_amount)
+
+if __name__ == "__main__":
+    main()
+`,
+            // status: "?", // '?' indicates the file is Untracked
+          },
+        ],
+      },
+      {
+        type: "file",
+        name: "main.py",
+        path: "/main.py",
+        content: `import random
+
+adjectives = [
+    "Swift", "Mighty", "Silent", "Brave", "Lucky",
+    "Crazy", "Rapid", "Shadow", "Electric", "Golden"
+]
+
+nouns = [
+    "Tiger", "Eagle", "Wizard", "Panther", "Knight",
+    "Ninja", "Falcon", "Coder", "Samurai", "Wolf"
+]
+
+def generate_nickname(name):
+    adj = random.choice(adjectives)
+    noun = random.choice(nouns)
+    return f"{adj} {noun} {name}"
+
+def main():
+    print("=== Nickname Generator ===")
+    user_name = input("Enter your name: ")
+    
+    print("\nGenerating a random nickname for you...")
+    nickname = generate_nickname(user_name)
+    print(f"Your nickname: {nickname}")
+
+if __name__ == "__main__":
+    main()
+`,
+        status: "",
+      },
+      {
+        type: "file",
+        name: "scripts.js",
+        path: "/scripts.js",
+        content: `console.log("hello world")`,
+        status: "", // '?' indicates the file is Untracked
+      },
+      {
+        type: "file",
+        name: "package.json",
+        path: "/package.json",
+        content: '{ "name": "my-app" }',
+        status: "",
+      },
       // {
       //   type: "file",
       //   name: "config.js",
